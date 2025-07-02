@@ -20,7 +20,6 @@ export class SlackServer {
   constructor(options: SlackServerOptions = {}) {
     const socketToken = options.socketToken || process.env.SLACK_APP_TOKEN;
     const botToken = options.botToken || process.env.SLACK_BOT_TOKEN;
-    const signingSecret = options.signingSecret || process.env.SLACK_SIGNING_SECRET;
 
     if (!socketToken) {
       throw new Error('SLACK_APP_TOKEN is required for Socket Mode');
@@ -30,15 +29,10 @@ export class SlackServer {
       throw new Error('SLACK_BOT_TOKEN is required');
     }
 
-    if (!signingSecret) {
-      throw new Error('SLACK_SIGNING_SECRET is required');
-    }
-
     // Initialize Bolt app
     this.app = new Bolt.App({
       token: botToken,
       appToken: socketToken,
-      signingSecret: signingSecret,
       socketMode: true,
     });
 

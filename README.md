@@ -24,7 +24,6 @@ A Slack bot built with Slack Bolt framework, Node.js and TypeScript.
    - Enable Socket Mode in your app settings  
    - Get your App-Level Token (starts with `xapp-`) - needed for Socket Mode
    - Get your Bot User OAuth Token (starts with `xoxb-`)
-   - Get your Signing Secret from Basic Information
 
 3. **Create environment file:**
    ```bash
@@ -65,8 +64,9 @@ code-bridge example
 
 - `SLACK_APP_TOKEN` - Your Slack app's App-Level Token for Socket Mode (required)
 - `SLACK_BOT_TOKEN` - Your Slack app's Bot User OAuth Token (required)  
-- `SLACK_SIGNING_SECRET` - Your Slack app's Signing Secret (required)
 - `NODE_ENV` - Environment (development/production)
+
+Note: `SLACK_SIGNING_SECRET` is not required when using Socket Mode.
 
 ## Development Scripts
 
