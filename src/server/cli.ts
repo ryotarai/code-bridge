@@ -29,7 +29,7 @@ program
   .action(async (options) => {
     try {
       // Load configuration
-      const config = loadConfigFromFile(options.config);
+      const config = loadConfigFromFile(options.config || 'config.yaml');
 
       // Allow CLI options to override config file
       const host = options.host || config.server.host;

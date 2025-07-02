@@ -15,7 +15,10 @@
     "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate": "rm -rf src/proto && buf lint && buf generate",
-    "docker:build:server": "docker build -t code-bridge-server -f Dockerfile.server ."
+    "kind:start": "kind create cluster --kubeconfig tmp/kubeconfig -n code-bridge",
+    "kind:stop": "kind delete cluster --kubeconfig tmp/kubeconfig -n code-bridge",
+    "dev:deploy": "make -j2 dev/deploy",
+    "dev:logs": "KUBECONFIG=tmp/kubeconfig stern -A --container-state running ^code-bridge-"
   },
   "keywords": [],
   "author": "",

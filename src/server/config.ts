@@ -39,16 +39,15 @@ export function loadConfigFromFile(configPath: string): Config {
   let rawConfig: any = {};
 
   // Try to load from JSON file if specified
-  if (configPath) {
-    try {
-      const configFile = resolve(configPath);
-      const fileContent = readFileSync(configFile, 'utf-8');
-      rawConfig = parse(fileContent);
-    } catch (error) {
-      throw new Error(`Failed to load config file ${configPath}: ${error}`);
-    }
+  try {
+    const configFile = resolve(configPath);
+    const fileContent = readFileSync(configFile, 'utf-8');
+    rawConfig = parse(fileContent);
+  } catch (error) {
+    throw new Error(`Failed to load config file ${configPath}: ${error}`);
   }
 
+  rawConfig.slack ||= {};
   if (process.env.SLACK_APP_TOKEN) {
     rawConfig.slack.appToken = process.env.SLACK_APP_TOKEN;
   }

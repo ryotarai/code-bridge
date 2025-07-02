@@ -63,7 +63,9 @@ spec:
         image: code-bridge-server
         imagePullPolicy: Never
         args:
-        - -config=/config/config.yaml
+        - start
+        - --config
+        - /config/config.yaml
         ports:
         - containerPort: 8080
         env:

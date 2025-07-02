@@ -42,4 +42,4 @@ USER appuser
 EXPOSE 3000
 
 # Set the default command to start the server
-ENTRYPOINT ["npm", "run", "start:server"]
+ENTRYPOINT ["npm", "run", "start:server", "--"]
