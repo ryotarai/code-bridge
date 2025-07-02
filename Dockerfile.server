@@ -1,0 +1,45 @@
+# Build stage
+FROM node:24 AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci
+
+# Copy source code and configuration files
+COPY . .
+
+# Build the TypeScript project
+RUN npm run build
+
+######################################################################
+
+# Production stage
+FROM node:24 AS production
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy built application from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Create a non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Expose the port (default from typical server setup)
+EXPOSE 3000
+
+# Set the default command to start the server
+ENTRYPOINT ["npm", "run", "start:server"]

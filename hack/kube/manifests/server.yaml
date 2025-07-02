@@ -1,0 +1,107 @@
+# SA
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: code-bridge-server
+  namespace: code-bridge-system
+  labels:
+    app: code-bridge-server
+---
+# Role to allow the SA to create pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: code-bridge-server
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "update"]
+---
+# Allow the SA to create pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: code-bridge-server
+  namespace: code-bridge-runner
+subjects:
+  - kind: ServiceAccount
+    name: code-bridge-server
+    namespace: code-bridge-system
+roleRef:
+  kind: ClusterRole
+  name: code-bridge-server
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: code-bridge-server
+  namespace: code-bridge-system
+  labels:
+    app: code-bridge-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: code-bridge-server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: code-bridge-server
+    spec:
+      serviceAccountName: code-bridge-server
+      containers:
+      - name: server
+        image: code-bridge-server
+        imagePullPolicy: Never
+        args:
+        - -config=/config/config.yaml
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SLACK_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: code-bridge-server-env
+              key: SLACK_BOT_TOKEN
+        - name: SLACK_APP_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: code-bridge-server-env
+              key: SLACK_APP_TOKEN
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/google-cred.json
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        - name: secret
+          mountPath: /secret
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: code-bridge-server-files
+      - name: secret
+        secret:
+          secretName: code-bridge-server-files
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: code-bridge-server
+  namespace: code-bridge-system
+spec:
+  selector:
+    app: code-bridge-server
+  ports:
+    - port: 8080
+      targetPort: 8080

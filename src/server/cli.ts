@@ -3,6 +3,8 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { createExampleCommand } from './commands/example.js';
+import { loadConfigFromFile } from './config.js';
+import { KubernetesInfra } from './infra/kubernetes.js';
 import { startServer } from './server.js';
 import { SlackServer } from './slack-server.js';
 
@@ -19,16 +21,33 @@ program.name('code-bridge').description('Code Bridge Server').version(version);
 program
   .command('start')
   .description('Start both the Fastify server and Slack socket mode server')
-  .option('-p, --port <port>', 'Port for the Fastify server', '3000')
-  .option('-h, --host <host>', 'Host for the Fastify server', 'localhost')
+  .option('-c, --config <path>', 'Path to configuration file (JSON)')
+  .option('-p, --port <port>', 'Port for the Fastify server (overrides config)', (val) =>
+    parseInt(val, 10)
+  )
+  .option('-h, --host <host>', 'Host for the Fastify server (overrides config)')
   .action(async (options) => {
     try {
-      const port = parseInt(options.port, 10);
-      const host = options.host;
+      // Load configuration
+      const config = loadConfigFromFile(options.config);
+
+      // Allow CLI options to override config file
+      const host = options.host || config.server.host;
+      const port = options.port || config.server.port;
 
       console.log(chalk.green('Starting Code Bridge servers...'));
+      console.log(
+        chalk.gray(
+          `Configuration loaded${options.config ? ` from ${options.config}` : ' from environment variables'}`
+        )
+      );
 
-      const slackServer = new SlackServer();
+      const infra = new KubernetesInfra();
+      const slackServer = new SlackServer({
+        infra,
+        socketToken: config.slack.appToken,
+        botToken: config.slack.botToken,
+      });
 
       // Handle graceful shutdown
       const shutdown = async (): Promise<void> => {
@@ -44,14 +63,14 @@ program
       // Start both servers concurrently
       await Promise.all([
         // Start Fastify server
-        (async () => {
+        (async (): Promise<void> => {
           console.log(chalk.blue(`Starting Fastify server on ${host}:${port}...`));
           await startServer({ port, host });
           console.log(chalk.green(`✓ Fastify server started on ${host}:${port}`));
         })(),
 
         // Start Slack server
-        (async () => {
+        (async (): Promise<void> => {
           console.log(chalk.blue('Starting Slack socket mode server...'));
           await slackServer.start();
           console.log(chalk.green('✓ Slack socket mode server started'));
@@ -66,6 +85,12 @@ program
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error(chalk.red('Failed to start servers:'), errorMessage);
+      if (error instanceof Error && error.message.includes('Configuration validation failed')) {
+        console.error(
+          chalk.yellow('💡 Tip: Check your configuration file or environment variables')
+        );
+        console.error(chalk.yellow('💡 Use config.example.json as a reference'));
+      }
       process.exit(1);
     }
   });

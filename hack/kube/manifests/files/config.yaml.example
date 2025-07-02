@@ -1,0 +1,19 @@
+runner:
+  namespace: "code-bridge-runner"
+  podSpec:
+    containers:
+      - name: runner
+        image: "code-bridge-runner"
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+          - secretRef:
+              name: "code-bridge-runner"
+        env:
+          - name: API_SERVER_URL
+            value: "http://code-bridge-server.code-bridge-system.svc.cluster.local:8080"
+    restartPolicy: "Never"
+storage:
+  googleCloudStorage:
+    bucket: "BUCKET_NAME_OF_GCS"
+github:
+  clientID: "CLIENT_ID_OF_GITHUB_APP"

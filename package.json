@@ -14,7 +14,8 @@
     "format": "prettier --write src",
     "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate": "rm -rf src/proto && buf lint && buf generate"
+    "generate": "rm -rf src/proto && buf lint && buf generate",
+    "docker:build:server": "docker build -t code-bridge-server -f Dockerfile.server ."
   },
   "keywords": [],
   "author": "",
@@ -37,11 +38,14 @@
     "@connectrpc/connect": "^2.0.2",
     "@connectrpc/connect-fastify": "^2.0.2",
     "@connectrpc/connect-node": "^2.0.2",
+    "@kubernetes/client-node": "^1.3.0",
     "@slack/bolt": "^4.4.0",
     "@slack/types": "^2.14.0",
     "chalk": "^5.4.1",
     "commander": "^14.0.0",
     "dotenv": "^17.0.1",
-    "fastify": "^5.4.0"
+    "fastify": "^5.4.0",
+    "yaml": "^2.8.0",
+    "zod": "^3.25.67"
   }
 }

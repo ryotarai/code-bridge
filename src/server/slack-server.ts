@@ -3,6 +3,7 @@ import bolt from '@slack/bolt';
 import { AppMentionEvent } from '@slack/types';
 import dotenv from 'dotenv';
 import { logger } from './index.js';
+import { Infra } from './infra/infra.js';
 
 const { App } = bolt;
 
@@ -10,31 +11,20 @@ const { App } = bolt;
 dotenv.config();
 
 export interface SlackServerOptions {
-  socketToken?: string;
-  botToken?: string;
-  signingSecret?: string;
+  infra: Infra;
+  socketToken: string;
+  botToken: string;
 }
 
 export class SlackServer {
   private app: AppType;
   private isRunning = false;
 
-  constructor(options: SlackServerOptions = {}) {
-    const socketToken = options.socketToken || process.env.SLACK_APP_TOKEN;
-    const botToken = options.botToken || process.env.SLACK_BOT_TOKEN;
-
-    if (!socketToken) {
-      throw new Error('SLACK_APP_TOKEN is required for Socket Mode');
-    }
-
-    if (!botToken) {
-      throw new Error('SLACK_BOT_TOKEN is required');
-    }
-
+  constructor(options: SlackServerOptions) {
     // Initialize Bolt app
     this.app = new App({
-      token: botToken,
-      appToken: socketToken,
+      token: options.botToken,
+      appToken: options.socketToken,
       socketMode: true,
     });
 

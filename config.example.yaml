@@ -1,0 +1,15 @@
+server:
+  host: localhost
+  port: 3000
+
+slack:
+  appToken: xapp-your-slack-app-token-here
+  botToken: xoxb-your-slack-bot-token-here
+  signingSecret: your-slack-signing-secret-here
+
+logging:
+  level: info
+
+kubernetes:
+  namespace: default
+  configPath: /path/to/kubeconfig

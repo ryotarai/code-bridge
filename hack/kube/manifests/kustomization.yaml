@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- secret.yaml
+- server.yaml
+- namespace.yaml
+configMapGenerator:
+- name: code-bridge-server-files
+  namespace: code-bridge-system
+  files:
+    - config.yaml=files/config.yaml
+secretGenerator:
+- name: code-bridge-server-files
+  namespace: code-bridge-system
+  files:
+    - google-cred.json=files/google-cred.json
