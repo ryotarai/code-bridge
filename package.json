@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsx src/cli.ts",
+    "dev:server": "tsx src/server/cli.ts",
     "start": "node dist/cli.js",
     "watch": "nodemon --exec tsx src/cli.ts",
     "lint": "eslint src --ext .ts",
