@@ -22,18 +22,10 @@ program
   .command('start')
   .description('Start both the Fastify server and Slack socket mode server')
   .option('-c, --config <path>', 'Path to configuration file (JSON)')
-  .option('-p, --port <port>', 'Port for the Fastify server (overrides config)', (val) =>
-    parseInt(val, 10)
-  )
-  .option('-h, --host <host>', 'Host for the Fastify server (overrides config)')
   .action(async (options) => {
     try {
       // Load configuration
       const config = loadConfigFromFile(options.config || 'config.yaml');
-
-      // Allow CLI options to override config file
-      const host = options.host || config.server.host;
-      const port = options.port || config.server.port;
 
       console.log(chalk.green('Starting Code Bridge servers...'));
       console.log(
@@ -64,9 +56,13 @@ program
       await Promise.all([
         // Start Fastify server
         (async (): Promise<void> => {
-          console.log(chalk.blue(`Starting Fastify server on ${host}:${port}...`));
-          await startServer({ port, host });
-          console.log(chalk.green(`✓ Fastify server started on ${host}:${port}`));
+          console.log(
+            chalk.blue(`Starting Fastify server on ${config.server.host}:${config.server.port}...`)
+          );
+          await startServer({ port: config.server.port, host: config.server.host });
+          console.log(
+            chalk.green(`✓ Fastify server started on ${config.server.host}:${config.server.port}`)
+          );
         })(),
 
         // Start Slack server

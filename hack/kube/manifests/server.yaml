@@ -65,33 +65,17 @@ spec:
         args:
         - start
         - --config
-        - /config/config.yaml
+        - /secret/config.yaml
         ports:
         - containerPort: 8080
         env:
-        - name: SLACK_BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: code-bridge-server-env
-              key: SLACK_BOT_TOKEN
-        - name: SLACK_APP_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: code-bridge-server-env
-              key: SLACK_APP_TOKEN
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /secret/google-cred.json
         volumeMounts:
-        - name: config
-          mountPath: /config
-          readOnly: true
         - name: secret
           mountPath: /secret
           readOnly: true
       volumes:
-      - name: config
-        configMap:
-          name: code-bridge-server-files
       - name: secret
         secret:
           secretName: code-bridge-server-files
