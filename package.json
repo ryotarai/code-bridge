@@ -13,7 +13,8 @@
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate": "rm -rf src/proto && buf lint && buf generate"
   },
   "keywords": [],
   "author": "",
@@ -30,10 +31,17 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@bufbuild/buf": "^1.55.1",
+    "@bufbuild/protobuf": "^2.6.0",
+    "@bufbuild/protoc-gen-es": "^2.6.0",
+    "@connectrpc/connect": "^2.0.2",
+    "@connectrpc/connect-fastify": "^2.0.2",
+    "@connectrpc/connect-node": "^2.0.2",
     "@slack/bolt": "^4.4.0",
     "@slack/types": "^2.14.0",
     "chalk": "^5.4.1",
     "commander": "^14.0.0",
-    "dotenv": "^17.0.1"
+    "dotenv": "^17.0.1",
+    "fastify": "^5.4.0"
   }
 }

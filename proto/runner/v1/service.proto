@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package runner.v1;
+
+option go_package = "github.com/ryotarai/code-bridge/gen/runner/v1;runnerv1";
+
+message CreateToolApprovalResponseRequest {
+    string request_id = 1;
+    bool approved = 2;
+}
+
+message CreateToolApprovalResponseResponse {
+}
+
+service RunnerService {
+    rpc CreateToolApprovalResponse(CreateToolApprovalResponseRequest) returns (CreateToolApprovalResponseResponse) {}
+}

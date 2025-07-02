@@ -1,8 +1,10 @@
-import type { SayFn } from '@slack/bolt';
-import * as Bolt from '@slack/bolt';
+import type { App as AppType, SayFn } from '@slack/bolt';
+import bolt from '@slack/bolt';
 import { AppMentionEvent } from '@slack/types';
 import dotenv from 'dotenv';
 import { logger } from './index.js';
+
+const { App } = bolt;
 
 // Load environment variables
 dotenv.config();
@@ -14,7 +16,7 @@ export interface SlackServerOptions {
 }
 
 export class SlackServer {
-  private app: Bolt.App;
+  private app: AppType;
   private isRunning = false;
 
   constructor(options: SlackServerOptions = {}) {
@@ -30,7 +32,7 @@ export class SlackServer {
     }
 
     // Initialize Bolt app
-    this.app = new Bolt.App({
+    this.app = new App({
       token: botToken,
       appToken: socketToken,
       socketMode: true,
