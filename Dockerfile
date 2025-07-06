@@ -21,6 +21,16 @@ RUN npm run build
 # Production stage
 FROM node:24 AS production
 
+# Run as runner user
+RUN groupadd -r runner && useradd -r -g runner -m -d /home/runner runner
+
+# /workspace
+RUN mkdir -p /app && chown runner:runner /app
+RUN mkdir -p /workspace && chown runner:runner /workspace
+
+# Install claude
+RUN npm install -g @anthropic-ai/claude-code
+
 # Set working directory
 WORKDIR /app
 
@@ -33,13 +43,23 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Create a non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
-USER appuser
+USER runner
+
+######################################################################
+
+FROM production AS server
 
 # Expose the port (default from typical server setup)
 EXPOSE 3000
 
 # Set the default command to start the server
-ENTRYPOINT ["npm", "run", "start:server", "--"]
+ENTRYPOINT ["node", "/app/dist/server/cli.js"]
+
+######################################################################
+
+FROM production AS runner
+
+WORKDIR /workspace
+
+# Set the default command to start the runner
+ENTRYPOINT ["node", "/app/dist/runner/main.js"]

@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - server.yaml
 - namespace.yaml
+- secret.yaml
 secretGenerator:
 - name: code-bridge-server-files
   namespace: code-bridge-system

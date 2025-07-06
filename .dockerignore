@@ -1,0 +1,5 @@
+node_modules
+/hack
+/proto
+tmp
+CLAUDE.md

@@ -1,0 +1,25 @@
+export type Env = {
+  initialInput: string;
+  apiServerURL: string;
+  threadId: string;
+};
+
+export function getEnv(): Env {
+  if (!process.env.INITIAL_INPUT) {
+    throw new Error('INITIAL_INPUT is not set');
+  }
+
+  if (!process.env.API_SERVER_URL) {
+    throw new Error('API_SERVER_URL is not set');
+  }
+
+  if (!process.env.THREAD_ID) {
+    throw new Error('THREAD_ID is not set');
+  }
+
+  return {
+    initialInput: process.env.INITIAL_INPUT,
+    apiServerURL: process.env.API_SERVER_URL,
+    threadId: process.env.THREAD_ID,
+  };
+}

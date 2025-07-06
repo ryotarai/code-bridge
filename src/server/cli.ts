@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { WebClient } from '@slack/web-api';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { createExampleCommand } from './commands/example.js';
@@ -7,10 +8,6 @@ import { loadConfigFromFile } from './config.js';
 import { KubernetesInfra } from './infra/kubernetes.js';
 import { startServer } from './server.js';
 import { SlackServer } from './slack-server.js';
-
-// // Read package.json for version
-// const packageJsonPath = join(__dirname, '..', '..', 'package.json');
-// const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 
 const version = '0.0.1';
 
@@ -34,7 +31,9 @@ program
         )
       );
 
-      const infra = new KubernetesInfra();
+      const slackClient = new WebClient(config.slack.botToken);
+
+      const infra = new KubernetesInfra(config.kubernetes);
       const slackServer = new SlackServer({
         infra,
         socketToken: config.slack.appToken,
@@ -59,7 +58,11 @@ program
           console.log(
             chalk.blue(`Starting Fastify server on ${config.server.host}:${config.server.port}...`)
           );
-          await startServer({ port: config.server.port, host: config.server.host });
+          await startServer({
+            port: config.server.port,
+            host: config.server.host,
+            slackClient,
+          });
           console.log(
             chalk.green(`✓ Fastify server started on ${config.server.host}:${config.server.port}`)
           );

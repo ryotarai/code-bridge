@@ -22,12 +22,15 @@ const ConfigSchema = z.object({
       level: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
     })
     .optional(),
-  kubernetes: z
-    .object({
-      namespace: z.string().default('default'),
-      configPath: z.string().optional(),
-    })
-    .optional(),
+  kubernetes: z.object({
+    namespace: z.string().default('default'),
+    configPath: z.string().optional(),
+    runner: z.object({
+      apiServerURL: z.string().min(1),
+      image: z.string().min(1),
+      podSpec: z.object({}).passthrough(),
+    }),
+  }),
 });
 
 // TypeScript type inferred from the schema

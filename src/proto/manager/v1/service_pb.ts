@@ -10,29 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file manager/v1/service.proto.
  */
 export const file_manager_v1_service: GenFile = /*@__PURE__*/
-  fileDesc("ChhtYW5hZ2VyL3YxL3NlcnZpY2UucHJvdG8SCm1hbmFnZXIudjEiMQoLU2xhY2tUaHJlYWQSDwoHY2hhbm5lbBgBIAEoCRIRCgl0aHJlYWRfdHMYAiABKAkiYQoaQ3JlYXRlQ2xhdWRlQ29kZUxvZ1JlcXVlc3QSFAoMcGF5bG9hZF9qc29uGAEgASgJEi0KDHNsYWNrX3RocmVhZBgCIAEoCzIXLm1hbmFnZXIudjEuU2xhY2tUaHJlYWQiHQobQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIlsKHENyZWF0ZVByb2dyZXNzTWVzc2FnZVJlcXVlc3QSDAoEdGV4dBgBIAEoCRItCgxzbGFja190aHJlYWQYAiABKAsyFy5tYW5hZ2VyLnYxLlNsYWNrVGhyZWFkIh8KHUNyZWF0ZVByb2dyZXNzTWVzc2FnZVJlc3BvbnNlIrABCiBDcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVxdWVzdBISCgpyZXF1ZXN0X2lkGAEgASgJEhEKCXRvb2xfbmFtZRgCIAEoCRINCgVpbnB1dBgDIAEoCRItCgxzbGFja190aHJlYWQYBCABKAsyFy5tYW5hZ2VyLnYxLlNsYWNrVGhyZWFkEhUKDXBvZF9uYW1lc3BhY2UYBSABKAkSEAoIcG9kX25hbWUYBiABKAkiIwohQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlc3BvbnNlMuYCCg5NYW5hZ2VyU2VydmljZRJoChNDcmVhdGVDbGF1ZGVDb2RlTG9nEiYubWFuYWdlci52MS5DcmVhdGVDbGF1ZGVDb2RlTG9nUmVxdWVzdBonLm1hbmFnZXIudjEuQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIgASbgoVQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlEigubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXF1ZXN0GikubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSIAEnoKGUNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3QSLC5tYW5hZ2VyLnYxLkNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0Gi0ubWFuYWdlci52MS5DcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL3J5b3RhcmFpL2NvZGUtYnJpZGdlL2dlbi9tYW5hZ2VyL3YxO21hbmFnZXJ2MWIGcHJvdG8z");
-
-/**
- * @generated from message manager.v1.SlackThread
- */
-export type SlackThread = Message<"manager.v1.SlackThread"> & {
-  /**
-   * @generated from field: string channel = 1;
-   */
-  channel: string;
-
-  /**
-   * @generated from field: string thread_ts = 2;
-   */
-  threadTs: string;
-};
-
-/**
- * Describes the message manager.v1.SlackThread.
- * Use `create(SlackThreadSchema)` to create a new message.
- */
-export const SlackThreadSchema: GenMessage<SlackThread> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 0);
+  fileDesc("ChhtYW5hZ2VyL3YxL3NlcnZpY2UucHJvdG8SCm1hbmFnZXIudjEiRQoaQ3JlYXRlQ2xhdWRlQ29kZUxvZ1JlcXVlc3QSFAoMcGF5bG9hZF9qc29uGAEgASgJEhEKCXRocmVhZF9pZBgCIAEoCSIdChtDcmVhdGVDbGF1ZGVDb2RlTG9nUmVzcG9uc2UiPwocQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlUmVxdWVzdBIMCgR0ZXh0GAEgASgJEhEKCXRocmVhZF9pZBgCIAEoCSIfCh1DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSKUAQogQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlcXVlc3QSEgoKcmVxdWVzdF9pZBgBIAEoCRIRCgl0b29sX25hbWUYAiABKAkSDQoFaW5wdXQYAyABKAkSEQoJdGhyZWFkX2lkGAQgASgJEhUKDXBvZF9uYW1lc3BhY2UYBSABKAkSEAoIcG9kX25hbWUYBiABKAkiIwohQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlc3BvbnNlMuYCCg5NYW5hZ2VyU2VydmljZRJoChNDcmVhdGVDbGF1ZGVDb2RlTG9nEiYubWFuYWdlci52MS5DcmVhdGVDbGF1ZGVDb2RlTG9nUmVxdWVzdBonLm1hbmFnZXIudjEuQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIgASbgoVQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlEigubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXF1ZXN0GikubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSIAEnoKGUNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3QSLC5tYW5hZ2VyLnYxLkNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0Gi0ubWFuYWdlci52MS5DcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL3J5b3RhcmFpL2NvZGUtYnJpZGdlL2dlbi9tYW5hZ2VyL3YxO21hbmFnZXJ2MWIGcHJvdG8z");
 
 /**
  * @generated from message manager.v1.CreateClaudeCodeLogRequest
@@ -44,9 +22,11 @@ export type CreateClaudeCodeLogRequest = Message<"manager.v1.CreateClaudeCodeLog
   payloadJson: string;
 
   /**
-   * @generated from field: manager.v1.SlackThread slack_thread = 2;
+   * e.g. "slack/CHANNEL_ID/THREAD_ID"
+   *
+   * @generated from field: string thread_id = 2;
    */
-  slackThread?: SlackThread;
+  threadId: string;
 };
 
 /**
@@ -54,7 +34,7 @@ export type CreateClaudeCodeLogRequest = Message<"manager.v1.CreateClaudeCodeLog
  * Use `create(CreateClaudeCodeLogRequestSchema)` to create a new message.
  */
 export const CreateClaudeCodeLogRequestSchema: GenMessage<CreateClaudeCodeLogRequest> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 1);
+  messageDesc(file_manager_v1_service, 0);
 
 /**
  * @generated from message manager.v1.CreateClaudeCodeLogResponse
@@ -67,7 +47,7 @@ export type CreateClaudeCodeLogResponse = Message<"manager.v1.CreateClaudeCodeLo
  * Use `create(CreateClaudeCodeLogResponseSchema)` to create a new message.
  */
 export const CreateClaudeCodeLogResponseSchema: GenMessage<CreateClaudeCodeLogResponse> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 2);
+  messageDesc(file_manager_v1_service, 1);
 
 /**
  * @generated from message manager.v1.CreateProgressMessageRequest
@@ -79,9 +59,9 @@ export type CreateProgressMessageRequest = Message<"manager.v1.CreateProgressMes
   text: string;
 
   /**
-   * @generated from field: manager.v1.SlackThread slack_thread = 2;
+   * @generated from field: string thread_id = 2;
    */
-  slackThread?: SlackThread;
+  threadId: string;
 };
 
 /**
@@ -89,7 +69,7 @@ export type CreateProgressMessageRequest = Message<"manager.v1.CreateProgressMes
  * Use `create(CreateProgressMessageRequestSchema)` to create a new message.
  */
 export const CreateProgressMessageRequestSchema: GenMessage<CreateProgressMessageRequest> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 3);
+  messageDesc(file_manager_v1_service, 2);
 
 /**
  * @generated from message manager.v1.CreateProgressMessageResponse
@@ -102,7 +82,7 @@ export type CreateProgressMessageResponse = Message<"manager.v1.CreateProgressMe
  * Use `create(CreateProgressMessageResponseSchema)` to create a new message.
  */
 export const CreateProgressMessageResponseSchema: GenMessage<CreateProgressMessageResponse> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 4);
+  messageDesc(file_manager_v1_service, 3);
 
 /**
  * @generated from message manager.v1.CreateToolApprovalRequestRequest
@@ -124,9 +104,9 @@ export type CreateToolApprovalRequestRequest = Message<"manager.v1.CreateToolApp
   input: string;
 
   /**
-   * @generated from field: manager.v1.SlackThread slack_thread = 4;
+   * @generated from field: string thread_id = 4;
    */
-  slackThread?: SlackThread;
+  threadId: string;
 
   /**
    * @generated from field: string pod_namespace = 5;
@@ -144,7 +124,7 @@ export type CreateToolApprovalRequestRequest = Message<"manager.v1.CreateToolApp
  * Use `create(CreateToolApprovalRequestRequestSchema)` to create a new message.
  */
 export const CreateToolApprovalRequestRequestSchema: GenMessage<CreateToolApprovalRequestRequest> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 5);
+  messageDesc(file_manager_v1_service, 4);
 
 /**
  * @generated from message manager.v1.CreateToolApprovalRequestResponse
@@ -157,7 +137,7 @@ export type CreateToolApprovalRequestResponse = Message<"manager.v1.CreateToolAp
  * Use `create(CreateToolApprovalRequestResponseSchema)` to create a new message.
  */
 export const CreateToolApprovalRequestResponseSchema: GenMessage<CreateToolApprovalRequestResponse> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 6);
+  messageDesc(file_manager_v1_service, 5);
 
 /**
  * @generated from service manager.v1.ManagerService
