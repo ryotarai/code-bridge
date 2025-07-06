@@ -1,0 +1,28 @@
+server:
+  host: 0.0.0.0
+  port: 8080
+
+slack:
+  appToken: ''
+  botToken: ''
+
+logging:
+  level: info
+
+kubernetes:
+  namespace: code-bridge-runner
+  runner:
+    apiServerURL: http://code-bridge-server.code-bridge-system.svc.cluster.local:8080
+    image: code-bridge-runner
+    podSpec:
+      containers:
+      - name: main
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - secretRef:
+            name: code-bridge-runner-env
+
+kvs:
+  type: gcs
+  gcs:
+    bucket: ''
