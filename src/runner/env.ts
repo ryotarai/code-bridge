@@ -1,7 +1,7 @@
 export type Env = {
   initialInput: string;
   apiServerURL: string;
-  threadId: string;
+  sessionId: string;
 };
 
 export function getEnv(): Env {
@@ -13,13 +13,13 @@ export function getEnv(): Env {
     throw new Error('API_SERVER_URL is not set');
   }
 
-  if (!process.env.THREAD_ID) {
-    throw new Error('THREAD_ID is not set');
+  if (!process.env.SESSION_ID) {
+    throw new Error('SESSION_ID is not set');
   }
 
   return {
     initialInput: process.env.INITIAL_INPUT,
     apiServerURL: process.env.API_SERVER_URL,
-    threadId: process.env.THREAD_ID,
+    sessionId: process.env.SESSION_ID,
   };
 }

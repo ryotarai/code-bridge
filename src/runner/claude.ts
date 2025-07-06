@@ -19,12 +19,12 @@ export async function runClaude({
   initialInput,
   mcpPort,
   apiServerURL,
-  threadId,
+  sessionId,
 }: {
   initialInput: string;
   mcpPort: number;
   apiServerURL: string;
-  threadId: string;
+  sessionId: string;
 }): Promise<void> {
   // Create client for code-bridge-server
   const transport = createConnectTransport({
@@ -74,7 +74,7 @@ export async function runClaude({
     await client.createProgressMessage(
       create(CreateProgressMessageRequestSchema, {
         text: 'Starting Claude Code',
-        threadId,
+        sessionId,
       })
     );
   } catch (error) {
@@ -114,7 +114,7 @@ export async function runClaude({
           .createClaudeCodeLog(
             create(CreateClaudeCodeLogRequestSchema, {
               payloadJson: line,
-              threadId,
+              sessionId,
             })
           )
           .catch((error) => {

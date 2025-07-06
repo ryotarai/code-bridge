@@ -31,6 +31,18 @@ const ConfigSchema = z.object({
       podSpec: z.object({}).passthrough(),
     }),
   }),
+  kvs: z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal('inMemory'),
+    }),
+    z.object({
+      type: z.literal('gcs'),
+      gcs: z.object({
+        bucket: z.string().min(1),
+        prefix: z.string().default('kvs/'),
+      }),
+    }),
+  ]),
 });
 
 // TypeScript type inferred from the schema

@@ -21,7 +21,7 @@ await runClaude({
   mcpPort,
   initialInput: env.initialInput,
   apiServerURL: env.apiServerURL,
-  threadId: env.threadId,
+  sessionId: env.sessionId,
 });
 
 // Exit the process after runClaude completes

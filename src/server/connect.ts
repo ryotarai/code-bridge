@@ -1,7 +1,7 @@
 import type { ConnectRouter } from '@connectrpc/connect';
 import { WebClient } from '@slack/web-api';
 import { ManagerService } from '../proto/manager/v1/service_pb.js';
-import { parseThreadId } from './thread.js';
+import { SessionManager } from './sessions.js';
 
 type ClaudeCodeAssistantPayload = {
   type: 'assistant';
@@ -62,8 +62,10 @@ type ClaudeCodeMessagePayload =
 
 export const buildRoutes = ({
   slackClient,
+  sessionManager,
 }: {
   slackClient: WebClient;
+  sessionManager: SessionManager;
 }): ((router: ConnectRouter) => void) => {
   return (router: ConnectRouter): void => {
     router.service(ManagerService, {
@@ -71,7 +73,7 @@ export const buildRoutes = ({
       async createClaudeCodeLog(req) {
         console.log('CreateClaudeCodeLog called with:', {
           payloadJson: req.payloadJson,
-          threadId: req.threadId,
+          sessionId: req.sessionId,
         });
 
         const payload = JSON.parse(req.payloadJson) as ClaudeCodeMessagePayload;
@@ -79,14 +81,15 @@ export const buildRoutes = ({
 
         if (payload.type === 'assistant') {
           console.log('assistant', payload.message.content[0].text);
-          const { type: threadType, channelId, threadTs } = parseThreadId(req.threadId);
-          if (threadType === 'slack') {
-            await slackClient.chat.postMessage({
-              channel: channelId,
-              thread_ts: threadTs,
-              text: payload.message.content[0].text,
-            });
+          const session = await sessionManager.getSession(req.sessionId);
+          if (!session) {
+            throw new Error('Session not found');
           }
+          await slackClient.chat.postMessage({
+            channel: session.slackThread.channelId,
+            thread_ts: session.slackThread.threadTs,
+            text: payload.message.content[0].text,
+          });
         }
 
         // TODO: Implement Claude Code log creation logic
@@ -97,7 +100,7 @@ export const buildRoutes = ({
       async createProgressMessage(req) {
         console.log('CreateProgressMessage called with:', {
           text: req.text,
-          threadId: req.threadId,
+          sessionId: req.sessionId,
         });
 
         // TODO: Implement progress message creation logic
@@ -110,7 +113,7 @@ export const buildRoutes = ({
           requestId: req.requestId,
           toolName: req.toolName,
           input: req.input,
-          threadId: req.threadId,
+          sessionId: req.sessionId,
           podNamespace: req.podNamespace,
           podName: req.podName,
         });

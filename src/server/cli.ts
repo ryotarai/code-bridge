@@ -6,7 +6,9 @@ import { Command } from 'commander';
 import { createExampleCommand } from './commands/example.js';
 import { loadConfigFromFile } from './config.js';
 import { KubernetesInfra } from './infra/kubernetes.js';
+import { createKvs } from './kvs/kvs.js';
 import { startServer } from './server.js';
+import { SessionManager } from './sessions.js';
 import { SlackServer } from './slack-server.js';
 
 const version = '0.0.1';
@@ -32,12 +34,15 @@ program
       );
 
       const slackClient = new WebClient(config.slack.botToken);
+      const kvs = createKvs(config.kvs);
+      const sessionManager = new SessionManager(kvs);
 
       const infra = new KubernetesInfra(config.kubernetes);
       const slackServer = new SlackServer({
         infra,
         socketToken: config.slack.appToken,
         botToken: config.slack.botToken,
+        sessionManager,
       });
 
       // Handle graceful shutdown
@@ -62,6 +67,7 @@ program
             port: config.server.port,
             host: config.server.host,
             slackClient,
+            sessionManager,
           });
           console.log(
             chalk.green(`✓ Fastify server started on ${config.server.host}:${config.server.port}`)

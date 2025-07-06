@@ -4,7 +4,7 @@ import { AppMentionEvent } from '@slack/types';
 import dotenv from 'dotenv';
 import { logger } from './index.js';
 import { Infra } from './infra/infra.js';
-import { generateSlackThreadId } from './thread.js';
+import { SessionManager } from './sessions.js';
 
 const { App } = bolt;
 
@@ -15,12 +15,14 @@ export interface SlackServerOptions {
   infra: Infra;
   socketToken: string;
   botToken: string;
+  sessionManager: SessionManager;
 }
 
 export class SlackServer {
   private app: AppType;
   private isRunning = false;
   private infra: Infra;
+  private sessionManager: SessionManager;
 
   constructor(options: SlackServerOptions) {
     // Initialize Bolt app
@@ -34,6 +36,7 @@ export class SlackServer {
     this.setupEventHandlers();
 
     this.infra = options.infra;
+    this.sessionManager = options.sessionManager;
   }
 
   private setupEventHandlers(): void {
@@ -42,15 +45,12 @@ export class SlackServer {
       try {
         logger(`App mentioned: ${event.text} from user ${event.user} in channel ${event.channel}`);
 
-        // await say({
-        //   text: `Hello <@${event.user}>! I'm the Code Bridge bot. How can I help you?`,
-        //   thread_ts: event.ts,
-        // });
+        const session = await this.sessionManager.createSessionFromSlackThread({
+          channelId: event.channel,
+          threadTs: event.thread_ts ?? event.ts,
+        });
 
-        const threadTS = event.thread_ts ?? event.ts;
-        const threadId = generateSlackThreadId({ channelId: event.channel, threadTs: threadTS });
-
-        await this.infra.start({ initialInput: event.text, threadId });
+        await this.infra.start({ initialInput: event.text, sessionId: session.id });
       } catch (error) {
         logger(`Error handling app mention: ${error}`);
       }

@@ -1,6 +1,6 @@
 export type StartOptions = {
   initialInput: string;
-  threadId: string;
+  sessionId: string;
 };
 
 export interface Infra {

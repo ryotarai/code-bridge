@@ -14,8 +14,8 @@ export class KubernetesInfra implements Infra {
     this.config = config;
   }
 
-  async start({ initialInput, threadId }: StartOptions): Promise<void> {
-    console.log('Starting Kubernetes pod for thread:', threadId);
+  async start({ initialInput, sessionId }: StartOptions): Promise<void> {
+    console.log('Starting Kubernetes pod for session:', sessionId);
 
     const podSpec = this.config.runner.podSpec as unknown as k8s.V1PodSpec;
 
@@ -43,8 +43,8 @@ export class KubernetesInfra implements Infra {
       value: this.config.runner.apiServerURL,
     });
     mainContainer.env.push({
-      name: 'THREAD_ID',
-      value: threadId,
+      name: 'SESSION_ID',
+      value: sessionId,
     });
 
     mainContainer.image = this.config.runner.image;
@@ -55,7 +55,7 @@ export class KubernetesInfra implements Infra {
       namespace: this.config.namespace,
       body: {
         metadata: {
-          generateName: `code-bridge-runner-${threadId.replaceAll('/', '-').replaceAll('.', '').toLowerCase()}-`,
+          generateName: `code-bridge-runner-${sessionId.replaceAll('/', '-').toLowerCase()}`,
         },
         spec: podSpec,
       },

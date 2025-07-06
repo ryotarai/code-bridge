@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file manager/v1/service.proto.
  */
 export const file_manager_v1_service: GenFile = /*@__PURE__*/
-  fileDesc("ChhtYW5hZ2VyL3YxL3NlcnZpY2UucHJvdG8SCm1hbmFnZXIudjEiRQoaQ3JlYXRlQ2xhdWRlQ29kZUxvZ1JlcXVlc3QSFAoMcGF5bG9hZF9qc29uGAEgASgJEhEKCXRocmVhZF9pZBgCIAEoCSIdChtDcmVhdGVDbGF1ZGVDb2RlTG9nUmVzcG9uc2UiPwocQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlUmVxdWVzdBIMCgR0ZXh0GAEgASgJEhEKCXRocmVhZF9pZBgCIAEoCSIfCh1DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSKUAQogQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlcXVlc3QSEgoKcmVxdWVzdF9pZBgBIAEoCRIRCgl0b29sX25hbWUYAiABKAkSDQoFaW5wdXQYAyABKAkSEQoJdGhyZWFkX2lkGAQgASgJEhUKDXBvZF9uYW1lc3BhY2UYBSABKAkSEAoIcG9kX25hbWUYBiABKAkiIwohQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlc3BvbnNlMuYCCg5NYW5hZ2VyU2VydmljZRJoChNDcmVhdGVDbGF1ZGVDb2RlTG9nEiYubWFuYWdlci52MS5DcmVhdGVDbGF1ZGVDb2RlTG9nUmVxdWVzdBonLm1hbmFnZXIudjEuQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIgASbgoVQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlEigubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXF1ZXN0GikubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSIAEnoKGUNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3QSLC5tYW5hZ2VyLnYxLkNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0Gi0ubWFuYWdlci52MS5DcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL3J5b3RhcmFpL2NvZGUtYnJpZGdlL2dlbi9tYW5hZ2VyL3YxO21hbmFnZXJ2MWIGcHJvdG8z");
+  fileDesc("ChhtYW5hZ2VyL3YxL3NlcnZpY2UucHJvdG8SCm1hbmFnZXIudjEiRgoaQ3JlYXRlQ2xhdWRlQ29kZUxvZ1JlcXVlc3QSFAoMcGF5bG9hZF9qc29uGAEgASgJEhIKCnNlc3Npb25faWQYAiABKAkiHQobQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIkAKHENyZWF0ZVByb2dyZXNzTWVzc2FnZVJlcXVlc3QSDAoEdGV4dBgBIAEoCRISCgpzZXNzaW9uX2lkGAIgASgJIh8KHUNyZWF0ZVByb2dyZXNzTWVzc2FnZVJlc3BvbnNlIpUBCiBDcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVxdWVzdBISCgpyZXF1ZXN0X2lkGAEgASgJEhEKCXRvb2xfbmFtZRgCIAEoCRINCgVpbnB1dBgDIAEoCRISCgpzZXNzaW9uX2lkGAQgASgJEhUKDXBvZF9uYW1lc3BhY2UYBSABKAkSEAoIcG9kX25hbWUYBiABKAkiIwohQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlc3BvbnNlMuYCCg5NYW5hZ2VyU2VydmljZRJoChNDcmVhdGVDbGF1ZGVDb2RlTG9nEiYubWFuYWdlci52MS5DcmVhdGVDbGF1ZGVDb2RlTG9nUmVxdWVzdBonLm1hbmFnZXIudjEuQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIgASbgoVQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlEigubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXF1ZXN0GikubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSIAEnoKGUNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3QSLC5tYW5hZ2VyLnYxLkNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0Gi0ubWFuYWdlci52MS5DcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL3J5b3RhcmFpL2NvZGUtYnJpZGdlL2dlbi9tYW5hZ2VyL3YxO21hbmFnZXJ2MWIGcHJvdG8z");
 
 /**
  * @generated from message manager.v1.CreateClaudeCodeLogRequest
@@ -22,11 +22,9 @@ export type CreateClaudeCodeLogRequest = Message<"manager.v1.CreateClaudeCodeLog
   payloadJson: string;
 
   /**
-   * e.g. "slack/CHANNEL_ID/THREAD_ID"
-   *
-   * @generated from field: string thread_id = 2;
+   * @generated from field: string session_id = 2;
    */
-  threadId: string;
+  sessionId: string;
 };
 
 /**
@@ -59,9 +57,9 @@ export type CreateProgressMessageRequest = Message<"manager.v1.CreateProgressMes
   text: string;
 
   /**
-   * @generated from field: string thread_id = 2;
+   * @generated from field: string session_id = 2;
    */
-  threadId: string;
+  sessionId: string;
 };
 
 /**
@@ -104,9 +102,9 @@ export type CreateToolApprovalRequestRequest = Message<"manager.v1.CreateToolApp
   input: string;
 
   /**
-   * @generated from field: string thread_id = 4;
+   * @generated from field: string session_id = 4;
    */
-  threadId: string;
+  sessionId: string;
 
   /**
    * @generated from field: string pod_namespace = 5;
