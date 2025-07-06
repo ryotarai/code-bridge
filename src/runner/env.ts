@@ -2,6 +2,7 @@ export type Env = {
   initialInput: string;
   apiServerURL: string;
   sessionId: string;
+  sessionKey: string;
 };
 
 export function getEnv(): Env {
@@ -17,9 +18,14 @@ export function getEnv(): Env {
     throw new Error('SESSION_ID is not set');
   }
 
+  if (!process.env.SESSION_KEY) {
+    throw new Error('SESSION_KEY is not set');
+  }
+
   return {
     initialInput: process.env.INITIAL_INPUT,
     apiServerURL: process.env.API_SERVER_URL,
     sessionId: process.env.SESSION_ID,
+    sessionKey: process.env.SESSION_KEY,
   };
 }

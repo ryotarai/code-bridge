@@ -50,7 +50,11 @@ export class SlackServer {
           threadTs: event.thread_ts ?? event.ts,
         });
 
-        await this.infra.start({ initialInput: event.text, sessionId: session.id });
+        await this.infra.start({
+          initialInput: event.text,
+          sessionId: session.id,
+          sessionKey: session.key,
+        });
       } catch (error) {
         logger(`Error handling app mention: ${error}`);
       }

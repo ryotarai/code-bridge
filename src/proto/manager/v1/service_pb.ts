@@ -10,7 +10,29 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file manager/v1/service.proto.
  */
 export const file_manager_v1_service: GenFile = /*@__PURE__*/
-  fileDesc("ChhtYW5hZ2VyL3YxL3NlcnZpY2UucHJvdG8SCm1hbmFnZXIudjEiRgoaQ3JlYXRlQ2xhdWRlQ29kZUxvZ1JlcXVlc3QSFAoMcGF5bG9hZF9qc29uGAEgASgJEhIKCnNlc3Npb25faWQYAiABKAkiHQobQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIkAKHENyZWF0ZVByb2dyZXNzTWVzc2FnZVJlcXVlc3QSDAoEdGV4dBgBIAEoCRISCgpzZXNzaW9uX2lkGAIgASgJIh8KHUNyZWF0ZVByb2dyZXNzTWVzc2FnZVJlc3BvbnNlIpUBCiBDcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVxdWVzdBISCgpyZXF1ZXN0X2lkGAEgASgJEhEKCXRvb2xfbmFtZRgCIAEoCRINCgVpbnB1dBgDIAEoCRISCgpzZXNzaW9uX2lkGAQgASgJEhUKDXBvZF9uYW1lc3BhY2UYBSABKAkSEAoIcG9kX25hbWUYBiABKAkiIwohQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlc3BvbnNlMuYCCg5NYW5hZ2VyU2VydmljZRJoChNDcmVhdGVDbGF1ZGVDb2RlTG9nEiYubWFuYWdlci52MS5DcmVhdGVDbGF1ZGVDb2RlTG9nUmVxdWVzdBonLm1hbmFnZXIudjEuQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIgASbgoVQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlEigubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXF1ZXN0GikubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSIAEnoKGUNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3QSLC5tYW5hZ2VyLnYxLkNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0Gi0ubWFuYWdlci52MS5DcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL3J5b3RhcmFpL2NvZGUtYnJpZGdlL2dlbi9tYW5hZ2VyL3YxO21hbmFnZXJ2MWIGcHJvdG8z");
+  fileDesc("ChhtYW5hZ2VyL3YxL3NlcnZpY2UucHJvdG8SCm1hbmFnZXIudjEiIgoHU2Vzc2lvbhIKCgJpZBgBIAEoCRILCgNrZXkYAiABKAkiWAoaQ3JlYXRlQ2xhdWRlQ29kZUxvZ1JlcXVlc3QSFAoMcGF5bG9hZF9qc29uGAEgASgJEiQKB3Nlc3Npb24YAiABKAsyEy5tYW5hZ2VyLnYxLlNlc3Npb24iHQobQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIlIKHENyZWF0ZVByb2dyZXNzTWVzc2FnZVJlcXVlc3QSDAoEdGV4dBgBIAEoCRIkCgdzZXNzaW9uGAIgASgLMhMubWFuYWdlci52MS5TZXNzaW9uIh8KHUNyZWF0ZVByb2dyZXNzTWVzc2FnZVJlc3BvbnNlIqcBCiBDcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVxdWVzdBISCgpyZXF1ZXN0X2lkGAEgASgJEhEKCXRvb2xfbmFtZRgCIAEoCRINCgVpbnB1dBgDIAEoCRIkCgdzZXNzaW9uGAQgASgLMhMubWFuYWdlci52MS5TZXNzaW9uEhUKDXBvZF9uYW1lc3BhY2UYBSABKAkSEAoIcG9kX25hbWUYBiABKAkiIwohQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlc3BvbnNlMuYCCg5NYW5hZ2VyU2VydmljZRJoChNDcmVhdGVDbGF1ZGVDb2RlTG9nEiYubWFuYWdlci52MS5DcmVhdGVDbGF1ZGVDb2RlTG9nUmVxdWVzdBonLm1hbmFnZXIudjEuQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIgASbgoVQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlEigubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXF1ZXN0GikubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSIAEnoKGUNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3QSLC5tYW5hZ2VyLnYxLkNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0Gi0ubWFuYWdlci52MS5DcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL3J5b3RhcmFpL2NvZGUtYnJpZGdlL2dlbi9tYW5hZ2VyL3YxO21hbmFnZXJ2MWIGcHJvdG8z");
+
+/**
+ * @generated from message manager.v1.Session
+ */
+export type Session = Message<"manager.v1.Session"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string key = 2;
+   */
+  key: string;
+};
+
+/**
+ * Describes the message manager.v1.Session.
+ * Use `create(SessionSchema)` to create a new message.
+ */
+export const SessionSchema: GenMessage<Session> = /*@__PURE__*/
+  messageDesc(file_manager_v1_service, 0);
 
 /**
  * @generated from message manager.v1.CreateClaudeCodeLogRequest
@@ -22,9 +44,9 @@ export type CreateClaudeCodeLogRequest = Message<"manager.v1.CreateClaudeCodeLog
   payloadJson: string;
 
   /**
-   * @generated from field: string session_id = 2;
+   * @generated from field: manager.v1.Session session = 2;
    */
-  sessionId: string;
+  session?: Session;
 };
 
 /**
@@ -32,7 +54,7 @@ export type CreateClaudeCodeLogRequest = Message<"manager.v1.CreateClaudeCodeLog
  * Use `create(CreateClaudeCodeLogRequestSchema)` to create a new message.
  */
 export const CreateClaudeCodeLogRequestSchema: GenMessage<CreateClaudeCodeLogRequest> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 0);
+  messageDesc(file_manager_v1_service, 1);
 
 /**
  * @generated from message manager.v1.CreateClaudeCodeLogResponse
@@ -45,7 +67,7 @@ export type CreateClaudeCodeLogResponse = Message<"manager.v1.CreateClaudeCodeLo
  * Use `create(CreateClaudeCodeLogResponseSchema)` to create a new message.
  */
 export const CreateClaudeCodeLogResponseSchema: GenMessage<CreateClaudeCodeLogResponse> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 1);
+  messageDesc(file_manager_v1_service, 2);
 
 /**
  * @generated from message manager.v1.CreateProgressMessageRequest
@@ -57,9 +79,9 @@ export type CreateProgressMessageRequest = Message<"manager.v1.CreateProgressMes
   text: string;
 
   /**
-   * @generated from field: string session_id = 2;
+   * @generated from field: manager.v1.Session session = 2;
    */
-  sessionId: string;
+  session?: Session;
 };
 
 /**
@@ -67,7 +89,7 @@ export type CreateProgressMessageRequest = Message<"manager.v1.CreateProgressMes
  * Use `create(CreateProgressMessageRequestSchema)` to create a new message.
  */
 export const CreateProgressMessageRequestSchema: GenMessage<CreateProgressMessageRequest> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 2);
+  messageDesc(file_manager_v1_service, 3);
 
 /**
  * @generated from message manager.v1.CreateProgressMessageResponse
@@ -80,7 +102,7 @@ export type CreateProgressMessageResponse = Message<"manager.v1.CreateProgressMe
  * Use `create(CreateProgressMessageResponseSchema)` to create a new message.
  */
 export const CreateProgressMessageResponseSchema: GenMessage<CreateProgressMessageResponse> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 3);
+  messageDesc(file_manager_v1_service, 4);
 
 /**
  * @generated from message manager.v1.CreateToolApprovalRequestRequest
@@ -102,9 +124,9 @@ export type CreateToolApprovalRequestRequest = Message<"manager.v1.CreateToolApp
   input: string;
 
   /**
-   * @generated from field: string session_id = 4;
+   * @generated from field: manager.v1.Session session = 4;
    */
-  sessionId: string;
+  session?: Session;
 
   /**
    * @generated from field: string pod_namespace = 5;
@@ -122,7 +144,7 @@ export type CreateToolApprovalRequestRequest = Message<"manager.v1.CreateToolApp
  * Use `create(CreateToolApprovalRequestRequestSchema)` to create a new message.
  */
 export const CreateToolApprovalRequestRequestSchema: GenMessage<CreateToolApprovalRequestRequest> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 4);
+  messageDesc(file_manager_v1_service, 5);
 
 /**
  * @generated from message manager.v1.CreateToolApprovalRequestResponse
@@ -135,7 +157,7 @@ export type CreateToolApprovalRequestResponse = Message<"manager.v1.CreateToolAp
  * Use `create(CreateToolApprovalRequestResponseSchema)` to create a new message.
  */
 export const CreateToolApprovalRequestResponseSchema: GenMessage<CreateToolApprovalRequestResponse> = /*@__PURE__*/
-  messageDesc(file_manager_v1_service, 5);
+  messageDesc(file_manager_v1_service, 6);
 
 /**
  * @generated from service manager.v1.ManagerService

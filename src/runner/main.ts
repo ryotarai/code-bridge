@@ -22,6 +22,7 @@ await runClaude({
   initialInput: env.initialInput,
   apiServerURL: env.apiServerURL,
   sessionId: env.sessionId,
+  sessionKey: env.sessionKey,
 });
 
 // Exit the process after runClaude completes

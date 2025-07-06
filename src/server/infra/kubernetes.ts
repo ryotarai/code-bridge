@@ -14,9 +14,23 @@ export class KubernetesInfra implements Infra {
     this.config = config;
   }
 
-  async start({ initialInput, sessionId }: StartOptions): Promise<void> {
+  async start({ initialInput, sessionId, sessionKey }: StartOptions): Promise<void> {
     console.log('Starting Kubernetes pod for session:', sessionId);
 
+    // Create a secret
+    const secret = await this.k8sApi.createNamespacedSecret({
+      namespace: this.config.namespace,
+      body: {
+        metadata: {
+          generateName: `code-bridge-runner-${sessionId.toLowerCase()}-`,
+        },
+        stringData: {
+          SESSION_KEY: sessionKey,
+        },
+      },
+    });
+
+    // Create a pod
     const podSpec = this.config.runner.podSpec as unknown as k8s.V1PodSpec;
 
     const mainContainer = ((): k8s.V1Container => {
@@ -49,17 +63,44 @@ export class KubernetesInfra implements Infra {
 
     mainContainer.image = this.config.runner.image;
 
+    if (!mainContainer.envFrom) {
+      mainContainer.envFrom = [];
+    }
+    mainContainer.envFrom.push({
+      secretRef: {
+        name: secret.metadata!.name!,
+      },
+    });
+
     podSpec.restartPolicy = 'Never';
 
     const pods = await this.k8sApi.createNamespacedPod({
       namespace: this.config.namespace,
       body: {
         metadata: {
-          generateName: `code-bridge-runner-${sessionId.replaceAll('/', '-').toLowerCase()}`,
+          generateName: `code-bridge-runner-${sessionId.toLowerCase()}`,
         },
         spec: podSpec,
       },
     });
     console.log(pods);
+
+    // Update the owner reference of the secret to the pod
+    await this.k8sApi.patchNamespacedSecret({
+      name: secret.metadata!.name!,
+      namespace: this.config.namespace,
+      body: {
+        metadata: {
+          ownerReferences: [
+            {
+              apiVersion: 'v1',
+              kind: 'Pod',
+              name: pods.metadata!.name!,
+              uid: pods.metadata!.uid!,
+            },
+          ],
+        },
+      },
+    });
   }
 }

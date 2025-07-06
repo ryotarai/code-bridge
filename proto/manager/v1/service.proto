@@ -4,9 +4,14 @@ package manager.v1;
 
 option go_package = "github.com/ryotarai/code-bridge/gen/manager/v1;managerv1";
 
+message Session {
+  string id = 1;
+  string key = 2;
+}
+
 message CreateClaudeCodeLogRequest {
     string payload_json = 1;
-    string session_id = 2;
+    Session session = 2;
 }
 
 message CreateClaudeCodeLogResponse {
@@ -14,7 +19,7 @@ message CreateClaudeCodeLogResponse {
 
 message CreateProgressMessageRequest {
   string text = 1;
-  string session_id = 2;
+  Session session = 2;
 }
 
 message CreateProgressMessageResponse {
@@ -24,7 +29,7 @@ message CreateToolApprovalRequestRequest {
   string request_id = 1;
   string tool_name = 2;
   string input = 3;
-  string session_id = 4;
+  Session session = 4;
   string pod_namespace = 5;
   string pod_name = 6;
 }

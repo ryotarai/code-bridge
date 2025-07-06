@@ -73,7 +73,7 @@ export const buildRoutes = ({
       async createClaudeCodeLog(req) {
         console.log('CreateClaudeCodeLog called with:', {
           payloadJson: req.payloadJson,
-          sessionId: req.sessionId,
+          session: req.session,
         });
 
         const payload = JSON.parse(req.payloadJson) as ClaudeCodeMessagePayload;
@@ -81,10 +81,12 @@ export const buildRoutes = ({
 
         if (payload.type === 'assistant') {
           console.log('assistant', payload.message.content[0].text);
-          const session = await sessionManager.getSession(req.sessionId);
-          if (!session) {
-            throw new Error('Session not found');
+
+          if (!req.session) {
+            throw new Error('Session is required');
           }
+
+          const session = await sessionManager.getSession(req.session.id, req.session.key);
           await slackClient.chat.postMessage({
             channel: session.slackThread.channelId,
             thread_ts: session.slackThread.threadTs,
@@ -100,7 +102,7 @@ export const buildRoutes = ({
       async createProgressMessage(req) {
         console.log('CreateProgressMessage called with:', {
           text: req.text,
-          sessionId: req.sessionId,
+          session: req.session,
         });
 
         // TODO: Implement progress message creation logic
@@ -113,7 +115,7 @@ export const buildRoutes = ({
           requestId: req.requestId,
           toolName: req.toolName,
           input: req.input,
-          sessionId: req.sessionId,
+          session: req.session,
           podNamespace: req.podNamespace,
           podName: req.podName,
         });

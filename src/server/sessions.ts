@@ -1,8 +1,9 @@
-import crypto from 'crypto';
+import crypto, { timingSafeEqual } from 'crypto';
 import { Kvs } from './kvs/kvs.js';
 
 export interface Session {
   id: string;
+  key: string;
   slackThread: {
     channelId: string;
     threadTs: string;
@@ -12,10 +13,13 @@ export interface Session {
 export class SessionManager {
   constructor(private kvs: Kvs) {}
 
-  async getSession(sessionId: string): Promise<Session | null> {
-    const session = await this.kvs.get<Session>(this.kvsKey(sessionId));
+  async getSession(id: string, key: string): Promise<Session> {
+    const session = await this.kvs.get<Session>(this.kvsKey(id));
     if (!session) {
-      return null;
+      throw new Error('Session not found');
+    }
+    if (!timingSafeEqual(Buffer.from(session.key), Buffer.from(key))) {
+      throw new Error('Invalid session key');
     }
     return session;
   }
@@ -28,8 +32,10 @@ export class SessionManager {
     threadTs: string;
   }): Promise<Session> {
     const sessionId = crypto.randomUUID();
+    const sessionKey = crypto.randomUUID();
     const session: Session = {
       id: sessionId,
+      key: sessionKey,
       slackThread: {
         channelId,
         threadTs,
