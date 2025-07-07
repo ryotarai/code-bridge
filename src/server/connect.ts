@@ -76,15 +76,15 @@ export const buildRoutes = ({
           session: req.session,
         });
 
+        if (!req.session) {
+          throw new Error('Session is required');
+        }
+
         const payload = JSON.parse(req.payloadJson) as ClaudeCodeMessagePayload;
         console.log('payload', payload);
 
         if (payload.type === 'assistant') {
           console.log('assistant', payload.message.content[0].text);
-
-          if (!req.session) {
-            throw new Error('Session is required');
-          }
 
           const session = await sessionManager.getSession(req.session.id, req.session.key);
           await slackClient.chat.postMessage({
@@ -116,8 +116,69 @@ export const buildRoutes = ({
           toolName: req.toolName,
           input: req.input,
           session: req.session,
-          podNamespace: req.podNamespace,
-          podName: req.podName,
+        });
+
+        if (!req.session) {
+          throw new Error('Session is required');
+        }
+
+        const session = await sessionManager.getSession(req.session.id, req.session.key);
+
+        await slackClient.chat.postMessage({
+          channel: session.slackThread.channelId,
+          thread_ts: session.slackThread.threadTs,
+          blocks: [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `Tool approval request`,
+              },
+              fields: [
+                {
+                  type: 'mrkdwn',
+                  text: `*Tool name*: ${req.toolName}`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*Input*: \`${req.input}\``,
+                },
+              ],
+            },
+            {
+              type: 'actions',
+              elements: [
+                {
+                  type: 'button',
+                  text: {
+                    type: 'plain_text',
+                    text: 'Approve',
+                  },
+                  action_id: 'approve_tool',
+                  value: JSON.stringify({
+                    sessionId: req.session.id,
+                    sessionKey: req.session.key,
+                    requestId: req.requestId,
+                  }),
+                  style: 'primary',
+                },
+                {
+                  type: 'button',
+                  text: {
+                    type: 'plain_text',
+                    text: 'Deny',
+                  },
+                  action_id: 'deny_tool',
+                  value: JSON.stringify({
+                    sessionId: req.session.id,
+                    sessionKey: req.session.key,
+                    requestId: req.requestId,
+                  }),
+                  style: 'danger',
+                },
+              ],
+            },
+          ],
         });
 
         // TODO: Implement tool approval request creation logic

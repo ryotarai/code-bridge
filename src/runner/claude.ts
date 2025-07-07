@@ -1,6 +1,5 @@
 import { create } from '@bufbuild/protobuf';
-import { createClient } from '@connectrpc/connect';
-import { createConnectTransport } from '@connectrpc/connect-node';
+import { Client } from '@connectrpc/connect';
 import { spawn } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import {
@@ -18,31 +17,23 @@ interface ClaudeCodeLog {
 export async function runClaude({
   initialInput,
   mcpPort,
-  apiServerURL,
   sessionId,
   sessionKey,
+  client,
 }: {
   initialInput: string;
   mcpPort: number;
-  apiServerURL: string;
   sessionId: string;
   sessionKey: string;
+  client: Client<typeof ManagerService>;
 }): Promise<void> {
-  // Create client for code-bridge-server
-  const transport = createConnectTransport({
-    baseUrl: apiServerURL,
-    httpVersion: '1.1',
-  });
-
-  const client = createClient(ManagerService, transport);
-
   // Create MCP config
   const mcpConfigPath = '/tmp/mcp-config.json';
   const mcpConfig = {
     mcpServers: {
       'permission-prompt': {
-        type: 'sse',
-        url: `http://localhost:${mcpPort}/sse`,
+        type: 'http',
+        url: `http://localhost:${mcpPort}/mcp`,
       },
     },
   };
@@ -55,11 +46,11 @@ export async function runClaude({
     'stream-json',
     '--print',
     '--verbose',
-    // '--mcp-config',
-    // mcpConfigPath,
-    // '--permission-prompt-tool',
-    // 'mcp__permission-prompt__approval_prompt',
-    '--debug',
+    '--mcp-config',
+    mcpConfigPath,
+    '--permission-prompt-tool',
+    'mcp__permission-prompt__approval_prompt',
+    // '--debug',
   ];
 
   const claude = spawn('claude', args, {
@@ -96,7 +87,7 @@ export async function runClaude({
 
   // Process claude output line by line
   let buffer = '';
-  claude.stdout.on('data', (data) => {
+  claude.stdout.on('data', async (data) => {
     buffer += data.toString();
     const lines = buffer.split('\n');
     buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
@@ -115,19 +106,15 @@ export async function runClaude({
         const claudeCodeLog: ClaudeCodeLog = JSON.parse(line);
 
         // Send claude code log to manager service
-        client
-          .createClaudeCodeLog(
-            create(CreateClaudeCodeLogRequestSchema, {
-              payloadJson: line,
-              session: {
-                id: sessionId,
-                key: sessionKey,
-              },
-            })
-          )
-          .catch((error) => {
-            console.error('Failed to send claude code log:', error);
-          });
+        await client.createClaudeCodeLog(
+          create(CreateClaudeCodeLogRequestSchema, {
+            payloadJson: line,
+            session: {
+              id: sessionId,
+              key: sessionKey,
+            },
+          })
+        );
 
         // Extract session ID from init message
         if (claudeCodeLog.type === 'system' && claudeCodeLog.subtype === 'init') {

@@ -1,40 +1,95 @@
+import { create } from '@bufbuild/protobuf';
+import { Client } from '@connectrpc/connect';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import Fastify from 'fastify';
+import crypto from 'node:crypto';
 import { z } from 'zod';
+import {
+  CreateToolApprovalRequestRequestSchema,
+  ManagerService,
+} from '../proto/manager/v1/service_pb.js';
+import { isToolApproved } from './connect.js';
 
-// Create server instance
-const server = new McpServer({
-  name: 'Approval MCP Server',
-  version: '1.0.0',
-  capabilities: {
-    resources: {},
-    tools: {},
-  },
-});
+export async function startMcpServer({
+  port,
+  client,
+  sessionId,
+  sessionKey,
+}: {
+  port: number;
+  client: Client<typeof ManagerService>;
+  sessionId: string;
+  sessionKey: string;
+}): Promise<void> {
+  // Create server instance
+  const server = new McpServer({
+    name: 'Approval MCP Server',
+    version: '1.0.0',
+    capabilities: {
+      resources: {},
+      tools: {},
+    },
+  });
 
-server.tool(
-  'approval_prompt',
-  'Permission check',
-  {
-    tool_name: z.string().describe('Tool name'),
-    input: z.object({}).passthrough().describe('Input'),
-  },
-  async ({ tool_name, input }) => {
-    console.log(tool_name, input);
+  server.tool(
+    'approval_prompt',
+    'Permission check',
+    {
+      tool_name: z.string().describe('Tool name'),
+      input: z.object({}).passthrough().describe('Input'),
+    },
+    async ({ tool_name, input }) => {
+      console.log('MCP called', { tool_name, input });
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({ behavior: 'deny', message: 'All requests are denied' }),
-        },
-      ],
-    };
-  }
-);
+      // Call CreateToolApprovalRequest
 
-export async function startMcpServer(port: number): Promise<void> {
+      const requestId = crypto.randomUUID();
+      await client.createToolApprovalRequest(
+        create(CreateToolApprovalRequestRequestSchema, {
+          requestId,
+          toolName: tool_name,
+          input: JSON.stringify(input),
+          session: {
+            id: sessionId,
+            key: sessionKey,
+          },
+        })
+      );
+
+      let result: boolean;
+      while (true) {
+        const v = isToolApproved(requestId);
+        if (v === undefined) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } else {
+          result = v;
+          break;
+        }
+      }
+
+      if (result) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ behavior: 'allow', updatedInput: input }),
+            },
+          ],
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ behavior: 'deny', message: 'Denied by user' }),
+            },
+          ],
+        };
+      }
+    }
+  );
+
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
   });

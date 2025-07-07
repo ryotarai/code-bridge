@@ -59,6 +59,40 @@ export class SlackServer {
         logger(`Error handling app mention: ${error}`);
       }
     });
+
+    [
+      {
+        actionId: 'approve_tool',
+        approve: true,
+      },
+      {
+        actionId: 'deny_tool',
+        approve: false,
+      },
+    ].forEach(({ actionId, approve }) => {
+      this.app.action(actionId, async ({ ack, action }) => {
+        if (action.type === 'button') {
+          if (!action.value) {
+            throw new Error('No value found in action');
+          }
+          const actionValue = JSON.parse(action.value);
+          const session = await this.sessionManager.getSession(
+            actionValue.sessionId,
+            actionValue.sessionKey
+          );
+          if (!session.pod) {
+            throw new Error('Pod not found');
+          }
+          await this.infra.approveOrDenyTool({
+            namespace: session.pod.namespace,
+            name: session.pod.name,
+            requestId: actionValue.requestId,
+            approve,
+          });
+          await ack();
+        }
+      });
+    });
   }
 
   public async start(): Promise<void> {

@@ -37,7 +37,7 @@ program
       const kvs = createKvs(config.kvs);
       const sessionManager = new SessionManager(kvs);
 
-      const infra = new KubernetesInfra(config.kubernetes);
+      const infra = new KubernetesInfra(config.kubernetes, sessionManager);
       const slackServer = new SlackServer({
         infra,
         socketToken: config.slack.appToken,

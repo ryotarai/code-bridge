@@ -43,14 +43,14 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
-USER runner
-
 ######################################################################
 
 FROM production AS server
 
 # Expose the port (default from typical server setup)
 EXPOSE 3000
+
+USER runner
 
 # Set the default command to start the server
 ENTRYPOINT ["node", "/app/dist/server/cli.js"]
@@ -59,7 +59,11 @@ ENTRYPOINT ["node", "/app/dist/server/cli.js"]
 
 FROM production AS runner
 
+RUN apt-get update && apt-get install -y curl
+
 WORKDIR /workspace
+
+USER runner
 
 # Set the default command to start the runner
 ENTRYPOINT ["node", "/app/dist/runner/main.js"]

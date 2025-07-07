@@ -6,4 +6,15 @@ export type StartOptions = {
 
 export interface Infra {
   start(options: StartOptions): Promise<void>;
+  approveOrDenyTool({
+    namespace,
+    name,
+    requestId,
+    approve,
+  }: {
+    namespace: string;
+    name: string;
+    requestId: string;
+    approve: boolean;
+  }): Promise<void>;
 }

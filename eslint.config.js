@@ -6,6 +6,9 @@ export default [
   js.configs.recommended,
   {
     files: ['src/**/*.ts'],
+    env: {
+      node: true,
+    },
     languageOptions: {
       parser: tsparser,
       parserOptions: {

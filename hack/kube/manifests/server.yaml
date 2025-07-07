@@ -18,17 +18,34 @@ rules:
     verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
   - apiGroups: [""]
     resources: ["pods/exec"]
-    verbs: ["create"]
+    verbs: ["create", "get"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["create", "update"]
+    verbs: ["create", "update", "patch"]
 ---
-# Allow the SA to create pods
+# Allow the SA to create pods (namespace-scoped)
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: code-bridge-server
   namespace: code-bridge-runner
+subjects:
+  - kind: ServiceAccount
+    name: code-bridge-server
+    namespace: code-bridge-system
+roleRef:
+  kind: ClusterRole
+  name: code-bridge-server
+  apiGroup: rbac.authorization.k8s.io
+---
+# Cluster-wide binding for exec permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: code-bridge-server-exec
 subjects:
   - kind: ServiceAccount
     name: code-bridge-server
