@@ -31,6 +31,15 @@ const ConfigSchema = z.object({
       podSpec: z.object({}).passthrough(),
     }),
   }),
+  storage: z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal('gcs'),
+      gcs: z.object({
+        bucket: z.string().min(1),
+        prefix: z.string().default('files/'),
+      }),
+    }),
+  ]),
   kvs: z.discriminatedUnion('type', [
     z.object({
       type: z.literal('inMemory'),

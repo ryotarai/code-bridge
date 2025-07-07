@@ -10,6 +10,7 @@ import { createKvs } from './kvs/kvs.js';
 import { startServer } from './server.js';
 import { SessionManager } from './sessions.js';
 import { SlackServer } from './slack-server.js';
+import { createStorage } from './storage/storage.js';
 
 const version = '0.0.1';
 
@@ -35,9 +36,10 @@ program
 
       const slackClient = new WebClient(config.slack.botToken);
       const kvs = createKvs(config.kvs);
+      const storage = createStorage(config.storage);
       const sessionManager = new SessionManager(kvs);
 
-      const infra = new KubernetesInfra(config.kubernetes, sessionManager);
+      const infra = new KubernetesInfra(config.kubernetes, sessionManager, storage);
       const slackServer = new SlackServer({
         infra,
         socketToken: config.slack.appToken,

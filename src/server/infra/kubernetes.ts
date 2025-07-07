@@ -2,6 +2,7 @@ import * as k8s from '@kubernetes/client-node';
 import { PassThrough } from 'stream';
 import { Config } from '../config.js';
 import { SessionManager } from '../sessions.js';
+import { Storage } from '../storage/storage.js';
 import { Infra, StartOptions } from './infra.js';
 
 export class KubernetesInfra implements Infra {
@@ -9,8 +10,9 @@ export class KubernetesInfra implements Infra {
   private config: Config['kubernetes'];
   private sessionManager: SessionManager;
   private k8sExec: k8s.Exec;
+  private storage: Storage;
 
-  constructor(config: Config['kubernetes'], sessionManager: SessionManager) {
+  constructor(config: Config['kubernetes'], sessionManager: SessionManager, storage: Storage) {
     const kc = new k8s.KubeConfig();
     kc.loadFromDefault();
 
@@ -18,6 +20,7 @@ export class KubernetesInfra implements Infra {
     this.k8sExec = new k8s.Exec(kc);
     this.config = config;
     this.sessionManager = sessionManager;
+    this.storage = storage;
   }
 
   async start({ initialInput, sessionId, sessionKey }: StartOptions): Promise<void> {
@@ -32,6 +35,14 @@ export class KubernetesInfra implements Infra {
         },
         stringData: {
           SESSION_KEY: sessionKey,
+          SESSION_UPLOAD_URL: await this.storage.getUploadUrl(
+            `${sessionId}-claude-session.jsonl`,
+            'application/jsonl'
+          ),
+          WORKSPACE_UPLOAD_URL: await this.storage.getUploadUrl(
+            `${sessionId}-workspace.tar.gz`,
+            'application/tar+gzip'
+          ),
         },
       },
     });

@@ -1,7 +1,7 @@
 import { create } from '@bufbuild/protobuf';
 import { Client } from '@connectrpc/connect';
 import { spawn } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import {
   CreateClaudeCodeLogRequestSchema,
   CreateProgressMessageRequestSchema,
@@ -11,7 +11,7 @@ import {
 interface ClaudeCodeLog {
   type: string;
   subtype?: string;
-  sessionID?: string;
+  session_id?: string;
 }
 
 export async function runClaude({
@@ -26,7 +26,7 @@ export async function runClaude({
   sessionId: string;
   sessionKey: string;
   client: Client<typeof ManagerService>;
-}): Promise<void> {
+}): Promise<{ exitCode: number | null; claudeSessionId: string }> {
   // Create MCP config
   const mcpConfigPath = '/tmp/mcp-config.json';
   const mcpConfig = {
@@ -83,7 +83,7 @@ export async function runClaude({
     claude.stdin.end();
   }
 
-  let sessionID = '';
+  let claudeSessionId = '';
 
   // Process claude output line by line
   let buffer = '';
@@ -117,8 +117,12 @@ export async function runClaude({
         );
 
         // Extract session ID from init message
-        if (claudeCodeLog.type === 'system' && claudeCodeLog.subtype === 'init') {
-          sessionID = claudeCodeLog.sessionID || '';
+        if (
+          claudeCodeLog.type === 'system' &&
+          claudeCodeLog.subtype === 'init' &&
+          claudeCodeLog.session_id
+        ) {
+          claudeSessionId = claudeCodeLog.session_id;
         }
       } catch (error) {
         console.error('Failed to parse claude code log:', error);
@@ -138,6 +142,27 @@ export async function runClaude({
   if (exitCode !== 0) {
     console.error(`Claude exited with code ${exitCode} (stderr: ${stderrBuf})`);
   } else {
-    console.log(`Claude completed successfully (session: ${sessionID})`);
+    console.log(`Claude completed successfully (session: ${claudeSessionId})`);
+  }
+
+  return {
+    exitCode,
+    claudeSessionId,
+  };
+}
+
+export async function uploadSession(claudeSessionId: string, sessionUploadUrl: string) {
+  const sessionFilePath = `/home/runner/.claude/projects/-workspace/${claudeSessionId}.jsonl`;
+  const sessionFile = readFileSync(sessionFilePath, 'utf8');
+  const response = await fetch(sessionUploadUrl, {
+    method: 'PUT',
+    body: sessionFile,
+    headers: {
+      'Content-Type': 'application/jsonl',
+    },
+  });
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Failed to upload session: ${response.statusText}: ${body}`);
   }
 }

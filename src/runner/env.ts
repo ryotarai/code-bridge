@@ -3,6 +3,8 @@ export type Env = {
   apiServerURL: string;
   sessionId: string;
   sessionKey: string;
+  sessionUploadUrl: string;
+  workspaceUploadUrl: string;
 };
 
 export function getEnv(): Env {
@@ -22,10 +24,20 @@ export function getEnv(): Env {
     throw new Error('SESSION_KEY is not set');
   }
 
+  if (!process.env.SESSION_UPLOAD_URL) {
+    throw new Error('SESSION_UPLOAD_URL is not set');
+  }
+
+  if (!process.env.WORKSPACE_UPLOAD_URL) {
+    throw new Error('WORKSPACE_UPLOAD_URL is not set');
+  }
+
   return {
     initialInput: process.env.INITIAL_INPUT,
     apiServerURL: process.env.API_SERVER_URL,
     sessionId: process.env.SESSION_ID,
     sessionKey: process.env.SESSION_KEY,
+    sessionUploadUrl: process.env.SESSION_UPLOAD_URL,
+    workspaceUploadUrl: process.env.WORKSPACE_UPLOAD_URL,
   };
 }

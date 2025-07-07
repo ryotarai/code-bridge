@@ -26,3 +26,8 @@ kvs:
   type: gcs
   gcs:
     bucket: ''
+
+storage:
+  type: gcs
+  gcs:
+    bucket: ''

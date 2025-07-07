@@ -1,7 +1,7 @@
 import { createClient } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-node';
 import { ManagerService } from '../proto/manager/v1/service_pb.js';
-import { runClaude } from './claude.js';
+import { runClaude, uploadSession } from './claude.js';
 import { getEnv } from './env.js';
 import { startMcpServer } from './mcp.js';
 import { startServer } from './server.js';
@@ -32,13 +32,16 @@ await startMcpServer({
 });
 
 // Run `claude` command
-await runClaude({
+const { claudeSessionId } = await runClaude({
   mcpPort,
   initialInput: env.initialInput,
   sessionId: env.sessionId,
   sessionKey: env.sessionKey,
   client,
 });
+
+console.log('Uploading Claude Code session');
+await uploadSession(claudeSessionId, env.sessionUploadUrl);
 
 // Exit the process after runClaude completes
 process.exit(0);
