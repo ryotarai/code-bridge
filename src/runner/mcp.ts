@@ -58,9 +58,23 @@ export async function startMcpServer({
       );
 
       let result: boolean;
+      const startTime = Date.now();
+      const timeoutMs = 30 * 60 * 1000; // 30 minutes
+
       while (true) {
         const v = isToolApproved(requestId);
         if (v === undefined) {
+          // Check if timeout exceeded
+          if (Date.now() - startTime > timeoutMs) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify({ behavior: 'deny', message: 'Denied by timeout' }),
+                },
+              ],
+            };
+          }
           await new Promise((resolve) => setTimeout(resolve, 100));
         } else {
           result = v;
