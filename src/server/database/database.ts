@@ -1,9 +1,10 @@
 export type DbSession = {
   key: string;
   createdAt: FirebaseFirestore.Timestamp;
-  slackThread: {
+  slack: {
     channelId: string;
     threadTs: string;
+    userId: string;
   };
   pod?: {
     namespace: string;
@@ -21,9 +22,11 @@ export interface Database {
   createSessionFromSlackThread({
     channelId,
     threadTs,
+    userId,
   }: {
     channelId: string;
     threadTs: string;
+    userId: string;
   }): Promise<Session>;
   findSessionBySlackThread({
     channelId,

@@ -88,8 +88,8 @@ export const buildRoutes = ({
 
           const session = await database.getSession(req.session.id, req.session.key);
           await slackClient.chat.postMessage({
-            channel: session.slackThread.channelId,
-            thread_ts: session.slackThread.threadTs,
+            channel: session.slack.channelId,
+            thread_ts: session.slack.threadTs,
             text: payload.message.content[0].text,
           });
         }
@@ -125,8 +125,8 @@ export const buildRoutes = ({
         const session = await database.getSession(req.session.id, req.session.key);
 
         await slackClient.chat.postMessage({
-          channel: session.slackThread.channelId,
-          thread_ts: session.slackThread.threadTs,
+          channel: session.slack.channelId,
+          thread_ts: session.slack.threadTs,
           blocks: [
             {
               type: 'section',

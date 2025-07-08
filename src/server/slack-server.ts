@@ -51,6 +51,10 @@ export class SlackServer {
           `App mentioned: ${event.text} from user ${event.user} in channel ${event.channel} (event_ts: ${event.event_ts}, thread_ts: ${event.thread_ts})`
         );
 
+        if (!event.user) {
+          throw new Error('User ID is required');
+        }
+
         const prevSession = event.thread_ts
           ? await this.database.findSessionBySlackThread({
               channelId: event.channel,
@@ -62,6 +66,7 @@ export class SlackServer {
         const session = await this.database.createSessionFromSlackThread({
           channelId: event.channel,
           threadTs: event.thread_ts ?? event.ts,
+          userId: event.user,
         });
 
         const threadHistory = event.thread_ts
@@ -76,7 +81,7 @@ export class SlackServer {
           : '';
 
         let githubToken: string | undefined;
-        if (event.user && this.github) {
+        if (this.github) {
           githubToken = await this.github.getInstallationTokenForUser(event.user);
         }
 
@@ -103,7 +108,24 @@ export class SlackServer {
         approve: false,
       },
     ].forEach(({ actionId, approve }) => {
-      this.app.action(actionId, async ({ ack, action }) => {
+      this.app.action(actionId, async ({ ack, action, context, body }) => {
+        await ack();
+        if (!context.userId) {
+          throw new Error('User ID is required');
+        }
+        if (!body.channel?.id) {
+          throw new Error('Channel ID is required');
+        }
+
+        const postEphemeral = async (text: string) => {
+          await this.app.client.chat.postEphemeral({
+            channel: body.channel!.id!,
+            user: body.user.id,
+            thread_ts: (body as any).message.thread_ts,
+            text,
+          });
+        };
+
         if (action.type === 'button') {
           if (!action.value) {
             throw new Error('No value found in action');
@@ -113,8 +135,15 @@ export class SlackServer {
             actionValue.sessionId,
             actionValue.sessionKey
           );
+          // if (session.slack.userId !== context.userId) {
+          if (session.slack.userId === context.userId) {
+            // Send ephemeral message to the user
+            await postEphemeral('You are not authorized to approve or deny this tool');
+            return;
+          }
           if (!session.pod) {
-            throw new Error('Pod not found');
+            await postEphemeral('Pod is not started yet');
+            return;
           }
           await this.infra.approveOrDenyTool({
             namespace: session.pod.namespace,
@@ -122,7 +151,6 @@ export class SlackServer {
             requestId: actionValue.requestId,
             approve,
           });
-          await ack();
         }
       });
     });

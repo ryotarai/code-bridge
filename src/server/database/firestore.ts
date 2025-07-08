@@ -32,16 +32,19 @@ export class FirestoreDatabase implements Database {
   async createSessionFromSlackThread({
     channelId,
     threadTs,
+    userId,
   }: {
     channelId: string;
     threadTs: string;
+    userId: string;
   }): Promise<Session> {
     const dbSession: DbSession = {
       key: crypto.randomUUID(),
       createdAt: Timestamp.now(),
-      slackThread: {
+      slack: {
         channelId,
         threadTs,
+        userId,
       },
     };
     const doc = await this.client.collection('sessions').add(dbSession);
@@ -61,7 +64,7 @@ export class FirestoreDatabase implements Database {
     // First query by threadTs only to avoid composite index
     const docs = await this.client
       .collection('sessions')
-      .where('slackThread.threadTs', '==', threadTs)
+      .where('slack.threadTs', '==', threadTs)
       .get();
 
     if (docs.empty) {
@@ -74,7 +77,7 @@ export class FirestoreDatabase implements Database {
         ...(doc.data() as DbSession),
         id: doc.id,
       }))
-      .filter((session) => session.slackThread?.channelId === channelId)
+      .filter((session) => session.slack.channelId === channelId)
       .sort((a, b) => {
         // Sort by createdAt desc (newest first)
         return b.createdAt.toMillis() - a.createdAt.toMillis();
