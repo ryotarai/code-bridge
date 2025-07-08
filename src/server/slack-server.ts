@@ -63,6 +63,16 @@ export class SlackServer {
           : undefined;
         logger(`Prev session: ${prevSession?.id}`);
 
+        if (prevSession && prevSession.slack.userId !== event.user) {
+          await this.app.client.chat.postEphemeral({
+            channel: event.channel,
+            user: event.user,
+            ...(event.thread_ts ? { thread_ts: event.thread_ts } : {}),
+            text: 'You are not authorized to start a new session',
+          });
+          return;
+        }
+
         const session = await this.database.createSessionFromSlackThread({
           channelId: event.channel,
           threadTs: event.thread_ts ?? event.ts,
@@ -135,8 +145,7 @@ export class SlackServer {
             actionValue.sessionId,
             actionValue.sessionKey
           );
-          // if (session.slack.userId !== context.userId) {
-          if (session.slack.userId === context.userId) {
+          if (session.slack.userId !== context.userId) {
             // Send ephemeral message to the user
             await postEphemeral('You are not authorized to approve or deny this tool');
             return;
