@@ -49,6 +49,25 @@ const ConfigSchema = z.object({
       }),
     }),
   ]),
+  github: z
+    .object({
+      auth: z.object({
+        appId: z.number().min(1),
+        clientId: z.string().min(1),
+        clientSecret: z.string().min(1),
+        privateKey: z.string().min(1),
+        installationId: z.number().min(1),
+      }),
+      repositories: z
+        .array(
+          z.object({
+            repositoryId: z.number().min(1),
+            writableSlackUserIds: z.array(z.string().min(1)),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
 });
 
 // TypeScript type inferred from the schema

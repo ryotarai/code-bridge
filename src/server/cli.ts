@@ -7,6 +7,7 @@ import { Command } from 'commander';
 import { createExampleCommand } from './commands/example.js';
 import { loadConfigFromFile } from './config.js';
 import { FirestoreDatabase } from './database/firestore.js';
+import { GitHub } from './github.js';
 import { KubernetesInfra } from './infra/kubernetes.js';
 import { startServer } from './server.js';
 import { SlackServer } from './slack-server.js';
@@ -39,6 +40,7 @@ program
         databaseId: config.database.firestore.databaseId,
       });
 
+      const github = config.github ? new GitHub(config.github) : undefined;
       const slackClient = new WebClient(config.slack.botToken);
       const storage = createStorage(config.storage);
       const database = new FirestoreDatabase(firestore);
@@ -49,6 +51,7 @@ program
         socketToken: config.slack.appToken,
         botToken: config.slack.botToken,
         database,
+        github,
       });
 
       // Handle graceful shutdown

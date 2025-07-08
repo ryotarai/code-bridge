@@ -3,6 +3,7 @@ import { createConnectTransport } from '@connectrpc/connect-node';
 import { ManagerService } from '../proto/manager/v1/service_pb.js';
 import { downloadSession, runClaude, uploadSession } from './claude.js';
 import { getEnv } from './env.js';
+import { setupGitHub } from './github.js';
 import { startMcpServer } from './mcp.js';
 import { startServer } from './server.js';
 import { downloadWorkspace, uploadWorkspace } from './workspace.js';
@@ -43,6 +44,12 @@ if (env.sessionDownloadUrl) {
 if (env.workspaceDownloadUrl) {
   console.log('Downloading workspace to resume');
   await downloadWorkspace(env.workspaceDownloadUrl);
+}
+
+// Setup GitHub
+if (env.githubToken) {
+  console.log('Setting up GitHub');
+  await setupGitHub(env.githubToken);
 }
 
 // Run `claude` command

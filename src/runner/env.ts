@@ -8,6 +8,7 @@ export type Env = {
   sessionDownloadUrl: string | undefined;
   workspaceDownloadUrl: string | undefined;
   systemPrompt: string;
+  githubToken: string | undefined;
 };
 
 export function getEnv(): Env {
@@ -35,7 +36,7 @@ export function getEnv(): Env {
     throw new Error('WORKSPACE_UPLOAD_URL is not set');
   }
 
-  if (!process.env.SYSTEM_PROMPT) {
+  if (process.env.SYSTEM_PROMPT === undefined) {
     throw new Error('SYSTEM_PROMPT is not set');
   }
 
@@ -49,5 +50,6 @@ export function getEnv(): Env {
     sessionDownloadUrl: process.env.SESSION_DOWNLOAD_URL,
     workspaceDownloadUrl: process.env.WORKSPACE_DOWNLOAD_URL,
     systemPrompt: process.env.SYSTEM_PROMPT,
+    githubToken: process.env.GITHUB_TOKEN,
   };
 }

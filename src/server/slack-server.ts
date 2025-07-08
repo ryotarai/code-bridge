@@ -3,6 +3,7 @@ import bolt from '@slack/bolt';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsRepliesResponse.js';
 import dotenv from 'dotenv';
 import { Database } from './database/database.js';
+import { GitHub } from './github.js';
 import { logger } from './index.js';
 import { Infra } from './infra/infra.js';
 
@@ -16,6 +17,7 @@ export interface SlackServerOptions {
   socketToken: string;
   botToken: string;
   database: Database;
+  github?: GitHub | undefined;
 }
 
 export class SlackServer {
@@ -23,6 +25,7 @@ export class SlackServer {
   private isRunning = false;
   private infra: Infra;
   private database: Database;
+  private github: GitHub | undefined;
 
   constructor(options: SlackServerOptions) {
     // Initialize Bolt app
@@ -37,6 +40,7 @@ export class SlackServer {
 
     this.infra = options.infra;
     this.database = options.database;
+    this.github = options.github;
   }
 
   private setupEventHandlers(): void {
@@ -71,12 +75,18 @@ export class SlackServer {
           ? generateSystemPrompt(threadHistory.messages)
           : '';
 
+        let githubToken: string | undefined;
+        if (event.user && this.github) {
+          githubToken = await this.github.getInstallationTokenForUser(event.user);
+        }
+
         await this.infra.start({
           initialInput: event.text,
           sessionId: session.id,
           sessionKey: session.key,
           resumeSessionId: prevSession?.id,
           systemPrompt,
+          githubToken,
         });
       } catch (error) {
         logger(`Error handling app mention: ${error}`);

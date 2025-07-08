@@ -29,6 +29,7 @@ export class KubernetesInfra implements Infra {
     sessionKey,
     resumeSessionId,
     systemPrompt,
+    githubToken,
   }: StartOptions): Promise<void> {
     console.log('Starting Kubernetes pod for session:', sessionId);
 
@@ -50,6 +51,7 @@ export class KubernetesInfra implements Infra {
                 WORKSPACE_DOWNLOAD_URL: await this.storage.getWorkspaceDownloadUrl(resumeSessionId),
               }
             : {}),
+          ...(githubToken ? { GITHUB_TOKEN: githubToken } : {}),
         },
       },
     });

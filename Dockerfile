@@ -61,6 +61,19 @@ FROM production AS runner
 
 RUN apt-get update && apt-get install -y curl
 
+# Install GitHub CLI based on architecture
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+        ARCH="arm64"; \
+    else \
+        ARCH="amd64"; \
+    fi && \
+    mkdir -p /tmp/gh && \   
+    curl -L https://github.com/cli/cli/releases/download/v2.74.2/gh_2.74.2_linux_${ARCH}.tar.gz -o /tmp/gh/gh.tar.gz && \
+    tar -xzf /tmp/gh/gh.tar.gz -C /tmp/gh && \
+    mv /tmp/gh/gh_2.74.2_linux_${ARCH}/bin/gh /usr/local/bin/gh && \
+    rm -rf /tmp/gh
+
 WORKDIR /workspace
 
 USER runner

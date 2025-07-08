@@ -22,12 +22,28 @@ kubernetes:
         - secretRef:
             name: code-bridge-runner-env
 
-kvs:
-  type: gcs
-  gcs:
-    bucket: ''
+database:
+  type: firestore
+  firestore:
+    projectId: ''
+    databaseId: ''
 
 storage:
   type: gcs
   gcs:
     bucket: ''
+
+github:
+  auth:
+    appId: 
+    installationId: 
+    clientId: ''
+    clientSecret: ''
+    privateKey: |
+      -----BEGIN RSA PRIVATE KEY-----
+      ...
+      -----END RSA PRIVATE KEY-----
+  repositories:
+    - repositoryId: 1
+      writableSlackUserIds:
+        - U09341C2UGY

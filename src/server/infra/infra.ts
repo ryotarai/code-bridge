@@ -4,6 +4,7 @@ export type StartOptions = {
   sessionKey: string;
   resumeSessionId?: string | undefined;
   systemPrompt: string;
+  githubToken?: string | undefined;
 };
 
 export interface Infra {
