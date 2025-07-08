@@ -1,7 +1,8 @@
 import { create } from '@bufbuild/protobuf';
 import { Client } from '@connectrpc/connect';
 import { spawn } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 import {
   CreateClaudeCodeLogRequestSchema,
   CreateProgressMessageRequestSchema,
@@ -20,13 +21,15 @@ export async function runClaude({
   sessionId,
   sessionKey,
   client,
+  resumeSessionId,
 }: {
   initialInput: string;
   mcpPort: number;
   sessionId: string;
   sessionKey: string;
   client: Client<typeof ManagerService>;
-}): Promise<{ exitCode: number | null; claudeSessionId: string }> {
+  resumeSessionId: string | undefined;
+}): Promise<{ exitCode: number | null; claudeSessionId: string | undefined }> {
   // Create MCP config
   const mcpConfigPath = '/tmp/mcp-config.json';
   const mcpConfig = {
@@ -52,6 +55,10 @@ export async function runClaude({
     'mcp__permission-prompt__approval_prompt',
     // '--debug',
   ];
+
+  if (resumeSessionId) {
+    args.push('--resume', resumeSessionId);
+  }
 
   const claude = spawn('claude', args, {
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -83,7 +90,7 @@ export async function runClaude({
     claude.stdin.end();
   }
 
-  let claudeSessionId = '';
+  let claudeSessionId: string | undefined;
 
   // Process claude output line by line
   let buffer = '';
@@ -165,4 +172,21 @@ export async function uploadSession(claudeSessionId: string, sessionUploadUrl: s
     const body = await response.text();
     throw new Error(`Failed to upload session: ${response.statusText}: ${body}`);
   }
+}
+
+// Returns Claude Code session ID
+export async function downloadSession(sessionDownloadUrl: string): Promise<string> {
+  const sessionId = crypto.randomUUID().toLowerCase();
+  const sessionFilePath = `/home/runner/.claude/projects/-workspace/${sessionId}.jsonl`;
+  const response = await fetch(sessionDownloadUrl, {
+    method: 'GET',
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to download session: ${response.statusText}`);
+  }
+  const sessionFile = await response.text();
+  // Create the directory
+  mkdirSync(dirname(sessionFilePath), { recursive: true });
+  writeFileSync(sessionFilePath, sessionFile);
+  return sessionId;
 }

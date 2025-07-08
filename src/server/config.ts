@@ -40,15 +40,12 @@ const ConfigSchema = z.object({
       }),
     }),
   ]),
-  kvs: z.discriminatedUnion('type', [
+  database: z.discriminatedUnion('type', [
     z.object({
-      type: z.literal('inMemory'),
-    }),
-    z.object({
-      type: z.literal('gcs'),
-      gcs: z.object({
-        bucket: z.string().min(1),
-        prefix: z.string().default('kvs/'),
+      type: z.literal('firestore'),
+      firestore: z.object({
+        projectId: z.string().min(1),
+        databaseId: z.string().min(1),
       }),
     }),
   ]),

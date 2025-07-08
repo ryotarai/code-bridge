@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
+import { Firestore } from '@google-cloud/firestore';
 import { WebClient } from '@slack/web-api';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { createExampleCommand } from './commands/example.js';
 import { loadConfigFromFile } from './config.js';
+import { FirestoreDatabase } from './database/firestore.js';
 import { KubernetesInfra } from './infra/kubernetes.js';
-import { createKvs } from './kvs/kvs.js';
 import { startServer } from './server.js';
-import { SessionManager } from './sessions.js';
 import { SlackServer } from './slack-server.js';
 import { createStorage } from './storage/storage.js';
 
@@ -34,17 +34,21 @@ program
         )
       );
 
-      const slackClient = new WebClient(config.slack.botToken);
-      const kvs = createKvs(config.kvs);
-      const storage = createStorage(config.storage);
-      const sessionManager = new SessionManager(kvs);
+      const firestore = new Firestore({
+        projectId: config.database.firestore.projectId,
+        databaseId: config.database.firestore.databaseId,
+      });
 
-      const infra = new KubernetesInfra(config.kubernetes, sessionManager, storage);
+      const slackClient = new WebClient(config.slack.botToken);
+      const storage = createStorage(config.storage);
+      const database = new FirestoreDatabase(firestore);
+
+      const infra = new KubernetesInfra(config.kubernetes, database, storage);
       const slackServer = new SlackServer({
         infra,
         socketToken: config.slack.appToken,
         botToken: config.slack.botToken,
-        sessionManager,
+        database,
       });
 
       // Handle graceful shutdown
@@ -69,7 +73,7 @@ program
             port: config.server.port,
             host: config.server.host,
             slackClient,
-            sessionManager,
+            database,
           });
           console.log(
             chalk.green(`✓ Fastify server started on ${config.server.host}:${config.server.port}`)

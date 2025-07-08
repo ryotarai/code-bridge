@@ -1,29 +1,34 @@
 import * as k8s from '@kubernetes/client-node';
 import { PassThrough } from 'stream';
 import { Config } from '../config.js';
-import { SessionManager } from '../sessions.js';
+import { Database } from '../database/database.js';
 import { Storage } from '../storage/storage.js';
 import { Infra, StartOptions } from './infra.js';
 
 export class KubernetesInfra implements Infra {
   private k8sApi: k8s.CoreV1Api;
   private config: Config['kubernetes'];
-  private sessionManager: SessionManager;
+  private database: Database;
   private k8sExec: k8s.Exec;
   private storage: Storage;
 
-  constructor(config: Config['kubernetes'], sessionManager: SessionManager, storage: Storage) {
+  constructor(config: Config['kubernetes'], database: Database, storage: Storage) {
     const kc = new k8s.KubeConfig();
     kc.loadFromDefault();
 
     this.k8sApi = kc.makeApiClient(k8s.CoreV1Api);
     this.k8sExec = new k8s.Exec(kc);
     this.config = config;
-    this.sessionManager = sessionManager;
+    this.database = database;
     this.storage = storage;
   }
 
-  async start({ initialInput, sessionId, sessionKey }: StartOptions): Promise<void> {
+  async start({
+    initialInput,
+    sessionId,
+    sessionKey,
+    resumeSessionId,
+  }: StartOptions): Promise<void> {
     console.log('Starting Kubernetes pod for session:', sessionId);
 
     // Create a secret
@@ -35,20 +40,20 @@ export class KubernetesInfra implements Infra {
         },
         stringData: {
           SESSION_KEY: sessionKey,
-          SESSION_UPLOAD_URL: await this.storage.getUploadUrl(
-            `${sessionId}-claude-session.jsonl`,
-            'application/jsonl'
-          ),
-          WORKSPACE_UPLOAD_URL: await this.storage.getUploadUrl(
-            `${sessionId}-workspace.tar.gz`,
-            'application/tar+gzip'
-          ),
+          SESSION_UPLOAD_URL: await this.storage.getSessionUploadUrl(sessionId),
+          WORKSPACE_UPLOAD_URL: await this.storage.getWorkspaceUploadUrl(sessionId),
+          ...(resumeSessionId
+            ? {
+                SESSION_DOWNLOAD_URL: await this.storage.getSessionDownloadUrl(resumeSessionId),
+                WORKSPACE_DOWNLOAD_URL: await this.storage.getWorkspaceDownloadUrl(resumeSessionId),
+              }
+            : {}),
         },
       },
     });
 
-    // Create a pod
-    const podSpec = this.config.runner.podSpec as unknown as k8s.V1PodSpec;
+    // Create a pod (deep copy)
+    const podSpec = JSON.parse(JSON.stringify(this.config.runner.podSpec)) as k8s.V1PodSpec;
 
     const mainContainer = ((): k8s.V1Container => {
       for (const container of podSpec.containers) {
@@ -95,7 +100,7 @@ export class KubernetesInfra implements Infra {
       namespace: this.config.namespace,
       body: {
         metadata: {
-          generateName: `code-bridge-runner-${sessionId.toLowerCase()}`,
+          generateName: `code-bridge-runner-${sessionId.toLowerCase()}-`,
         },
         spec: podSpec,
       },
@@ -116,7 +121,7 @@ export class KubernetesInfra implements Infra {
       body: secret,
     });
 
-    await this.sessionManager.updatePod(sessionId, sessionKey, {
+    await this.database.updatePod(sessionId, {
       namespace: this.config.namespace,
       name: pods.metadata!.name!,
     });

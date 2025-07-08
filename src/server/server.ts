@@ -2,22 +2,22 @@ import { fastifyConnectPlugin } from '@connectrpc/connect-fastify';
 import { WebClient } from '@slack/web-api';
 import { fastify } from 'fastify';
 import { buildRoutes } from './connect.js';
-import { SessionManager } from './sessions.js';
+import { Database } from './database/database.js';
 
 export async function startServer({
   port,
   host,
   slackClient,
-  sessionManager,
+  database,
 }: {
   port: number;
   host: string;
   slackClient: WebClient;
-  sessionManager: SessionManager;
+  database: Database;
 }): Promise<void> {
   const server = fastify();
   await server.register(fastifyConnectPlugin, {
-    routes: buildRoutes({ slackClient, sessionManager }),
+    routes: buildRoutes({ slackClient, database }),
   });
   server.get('/', (_, reply) => {
     reply.type('text/plain');

@@ -2,6 +2,7 @@ export type StartOptions = {
   initialInput: string;
   sessionId: string;
   sessionKey: string;
+  resumeSessionId?: string | undefined;
 };
 
 export interface Infra {

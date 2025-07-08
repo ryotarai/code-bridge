@@ -5,6 +5,10 @@ import { Config } from '../config';
 export interface Storage {
   getUploadUrl(key: string, contentType: string): Promise<string>;
   getDownloadUrl(key: string): Promise<string>;
+  getSessionUploadUrl(sessionId: string): Promise<string>;
+  getSessionDownloadUrl(sessionId: string): Promise<string>;
+  getWorkspaceUploadUrl(sessionId: string): Promise<string>;
+  getWorkspaceDownloadUrl(sessionId: string): Promise<string>;
 }
 
 export class GcsStorage implements Storage {
@@ -13,6 +17,22 @@ export class GcsStorage implements Storage {
     private bucket: string,
     private prefix: string
   ) {}
+
+  async getSessionUploadUrl(sessionId: string): Promise<string> {
+    return this.getUploadUrl(`${sessionId}-claude-session.jsonl`, 'application/jsonl');
+  }
+
+  async getSessionDownloadUrl(sessionId: string): Promise<string> {
+    return this.getDownloadUrl(`${sessionId}-claude-session.jsonl`);
+  }
+
+  async getWorkspaceUploadUrl(sessionId: string): Promise<string> {
+    return this.getUploadUrl(`${sessionId}-workspace.tar.gz`, 'application/tar+gzip');
+  }
+
+  async getWorkspaceDownloadUrl(sessionId: string): Promise<string> {
+    return this.getDownloadUrl(`${sessionId}-workspace.tar.gz`);
+  }
 
   async getUploadUrl(key: string, contentType: string): Promise<string> {
     const [url] = await this.client

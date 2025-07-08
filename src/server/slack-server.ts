@@ -2,9 +2,9 @@ import type { App as AppType, SayFn } from '@slack/bolt';
 import bolt from '@slack/bolt';
 import { AppMentionEvent } from '@slack/types';
 import dotenv from 'dotenv';
+import { Database } from './database/database.js';
 import { logger } from './index.js';
 import { Infra } from './infra/infra.js';
-import { SessionManager } from './sessions.js';
 
 const { App } = bolt;
 
@@ -15,14 +15,14 @@ export interface SlackServerOptions {
   infra: Infra;
   socketToken: string;
   botToken: string;
-  sessionManager: SessionManager;
+  database: Database;
 }
 
 export class SlackServer {
   private app: AppType;
   private isRunning = false;
   private infra: Infra;
-  private sessionManager: SessionManager;
+  private database: Database;
 
   constructor(options: SlackServerOptions) {
     // Initialize Bolt app
@@ -36,16 +36,26 @@ export class SlackServer {
     this.setupEventHandlers();
 
     this.infra = options.infra;
-    this.sessionManager = options.sessionManager;
+    this.database = options.database;
   }
 
   private setupEventHandlers(): void {
     // Handle app mentions only
     this.app.event('app_mention', async ({ event }: { event: AppMentionEvent; say: SayFn }) => {
       try {
-        logger(`App mentioned: ${event.text} from user ${event.user} in channel ${event.channel}`);
+        logger(
+          `App mentioned: ${event.text} from user ${event.user} in channel ${event.channel} (event_ts: ${event.event_ts}, thread_ts: ${event.thread_ts})`
+        );
 
-        const session = await this.sessionManager.createSessionFromSlackThread({
+        const prevSession = event.thread_ts
+          ? await this.database.findSessionBySlackThread({
+              channelId: event.channel,
+              threadTs: event.thread_ts,
+            })
+          : undefined;
+        logger(`Prev session: ${prevSession?.id}`);
+
+        const session = await this.database.createSessionFromSlackThread({
           channelId: event.channel,
           threadTs: event.thread_ts ?? event.ts,
         });
@@ -54,6 +64,7 @@ export class SlackServer {
           initialInput: event.text,
           sessionId: session.id,
           sessionKey: session.key,
+          resumeSessionId: prevSession?.id,
         });
       } catch (error) {
         logger(`Error handling app mention: ${error}`);
@@ -76,7 +87,7 @@ export class SlackServer {
             throw new Error('No value found in action');
           }
           const actionValue = JSON.parse(action.value);
-          const session = await this.sessionManager.getSession(
+          const session = await this.database.getSession(
             actionValue.sessionId,
             actionValue.sessionKey
           );

@@ -1,7 +1,7 @@
 import type { ConnectRouter } from '@connectrpc/connect';
 import { WebClient } from '@slack/web-api';
 import { ManagerService } from '../proto/manager/v1/service_pb.js';
-import { SessionManager } from './sessions.js';
+import { Database } from './database/database.js';
 
 type ClaudeCodeAssistantPayload = {
   type: 'assistant';
@@ -62,10 +62,10 @@ type ClaudeCodeMessagePayload =
 
 export const buildRoutes = ({
   slackClient,
-  sessionManager,
+  database,
 }: {
   slackClient: WebClient;
-  sessionManager: SessionManager;
+  database: Database;
 }): ((router: ConnectRouter) => void) => {
   return (router: ConnectRouter): void => {
     router.service(ManagerService, {
@@ -86,7 +86,7 @@ export const buildRoutes = ({
         if (payload.type === 'assistant') {
           console.log('assistant', payload.message.content[0].text);
 
-          const session = await sessionManager.getSession(req.session.id, req.session.key);
+          const session = await database.getSession(req.session.id, req.session.key);
           await slackClient.chat.postMessage({
             channel: session.slackThread.channelId,
             thread_ts: session.slackThread.threadTs,
@@ -122,7 +122,7 @@ export const buildRoutes = ({
           throw new Error('Session is required');
         }
 
-        const session = await sessionManager.getSession(req.session.id, req.session.key);
+        const session = await database.getSession(req.session.id, req.session.key);
 
         await slackClient.chat.postMessage({
           channel: session.slackThread.channelId,

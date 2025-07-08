@@ -5,6 +5,8 @@ export type Env = {
   sessionKey: string;
   sessionUploadUrl: string;
   workspaceUploadUrl: string;
+  sessionDownloadUrl: string | undefined;
+  workspaceDownloadUrl: string | undefined;
 };
 
 export function getEnv(): Env {
@@ -39,5 +41,7 @@ export function getEnv(): Env {
     sessionKey: process.env.SESSION_KEY,
     sessionUploadUrl: process.env.SESSION_UPLOAD_URL,
     workspaceUploadUrl: process.env.WORKSPACE_UPLOAD_URL,
+    sessionDownloadUrl: process.env.SESSION_DOWNLOAD_URL,
+    workspaceDownloadUrl: process.env.WORKSPACE_DOWNLOAD_URL,
   };
 }
