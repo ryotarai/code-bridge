@@ -3,6 +3,7 @@ export type StartOptions = {
   sessionId: string;
   sessionKey: string;
   resumeSessionId?: string | undefined;
+  systemPrompt: string;
 };
 
 export interface Infra {

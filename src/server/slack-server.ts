@@ -1,6 +1,6 @@
-import type { App as AppType, SayFn } from '@slack/bolt';
+import type { App as AppType, SlackEventMiddlewareArgs } from '@slack/bolt';
 import bolt from '@slack/bolt';
-import { AppMentionEvent } from '@slack/types';
+import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsRepliesResponse.js';
 import dotenv from 'dotenv';
 import { Database } from './database/database.js';
 import { logger } from './index.js';
@@ -41,7 +41,7 @@ export class SlackServer {
 
   private setupEventHandlers(): void {
     // Handle app mentions only
-    this.app.event('app_mention', async ({ event }: { event: AppMentionEvent; say: SayFn }) => {
+    this.app.event('app_mention', async ({ event }: SlackEventMiddlewareArgs<'app_mention'>) => {
       try {
         logger(
           `App mentioned: ${event.text} from user ${event.user} in channel ${event.channel} (event_ts: ${event.event_ts}, thread_ts: ${event.thread_ts})`
@@ -60,11 +60,23 @@ export class SlackServer {
           threadTs: event.thread_ts ?? event.ts,
         });
 
+        const threadHistory = event.thread_ts
+          ? await this.app.client.conversations.replies({
+              channel: event.channel,
+              ts: event.thread_ts,
+            })
+          : undefined;
+
+        const systemPrompt = threadHistory?.messages
+          ? generateSystemPrompt(threadHistory.messages)
+          : '';
+
         await this.infra.start({
           initialInput: event.text,
           sessionId: session.id,
           sessionKey: session.key,
           resumeSessionId: prevSession?.id,
+          systemPrompt,
         });
       } catch (error) {
         logger(`Error handling app mention: ${error}`);
@@ -143,4 +155,11 @@ export class SlackServer {
   public isServerRunning(): boolean {
     return this.isRunning;
   }
+}
+
+function generateSystemPrompt(messages: MessageElement[]): string {
+  let prompt = '';
+  prompt += "You are called from a Slack thread. Here's the thread history:\n\n";
+  prompt += messages.map((message) => `[${message.user}] ${message.text}`).join('\n');
+  return prompt;
 }

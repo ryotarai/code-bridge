@@ -28,6 +28,7 @@ export class KubernetesInfra implements Infra {
     sessionId,
     sessionKey,
     resumeSessionId,
+    systemPrompt,
   }: StartOptions): Promise<void> {
     console.log('Starting Kubernetes pod for session:', sessionId);
 
@@ -42,6 +43,7 @@ export class KubernetesInfra implements Infra {
           SESSION_KEY: sessionKey,
           SESSION_UPLOAD_URL: await this.storage.getSessionUploadUrl(sessionId),
           WORKSPACE_UPLOAD_URL: await this.storage.getWorkspaceUploadUrl(sessionId),
+          SYSTEM_PROMPT: systemPrompt,
           ...(resumeSessionId
             ? {
                 SESSION_DOWNLOAD_URL: await this.storage.getSessionDownloadUrl(resumeSessionId),

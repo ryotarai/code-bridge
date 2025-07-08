@@ -53,6 +53,7 @@ const { claudeSessionId } = await runClaude({
   sessionKey: env.sessionKey,
   resumeSessionId,
   client,
+  systemPrompt: env.systemPrompt,
 });
 
 if (claudeSessionId) {

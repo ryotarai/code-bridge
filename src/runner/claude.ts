@@ -22,6 +22,7 @@ export async function runClaude({
   sessionKey,
   client,
   resumeSessionId,
+  systemPrompt,
 }: {
   initialInput: string;
   mcpPort: number;
@@ -29,6 +30,7 @@ export async function runClaude({
   sessionKey: string;
   client: Client<typeof ManagerService>;
   resumeSessionId: string | undefined;
+  systemPrompt: string;
 }): Promise<{ exitCode: number | null; claudeSessionId: string | undefined }> {
   // Create MCP config
   const mcpConfigPath = '/tmp/mcp-config.json';
@@ -53,6 +55,8 @@ export async function runClaude({
     mcpConfigPath,
     '--permission-prompt-tool',
     'mcp__permission-prompt__approval_prompt',
+    '--append-system-prompt',
+    systemPrompt,
     // '--debug',
   ];
 

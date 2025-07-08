@@ -7,6 +7,7 @@ export type Env = {
   workspaceUploadUrl: string;
   sessionDownloadUrl: string | undefined;
   workspaceDownloadUrl: string | undefined;
+  systemPrompt: string;
 };
 
 export function getEnv(): Env {
@@ -34,6 +35,10 @@ export function getEnv(): Env {
     throw new Error('WORKSPACE_UPLOAD_URL is not set');
   }
 
+  if (!process.env.SYSTEM_PROMPT) {
+    throw new Error('SYSTEM_PROMPT is not set');
+  }
+
   return {
     initialInput: process.env.INITIAL_INPUT,
     apiServerURL: process.env.API_SERVER_URL,
@@ -43,5 +48,6 @@ export function getEnv(): Env {
     workspaceUploadUrl: process.env.WORKSPACE_UPLOAD_URL,
     sessionDownloadUrl: process.env.SESSION_DOWNLOAD_URL,
     workspaceDownloadUrl: process.env.WORKSPACE_DOWNLOAD_URL,
+    systemPrompt: process.env.SYSTEM_PROMPT,
   };
 }
