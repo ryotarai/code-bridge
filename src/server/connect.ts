@@ -84,13 +84,51 @@ export const buildRoutes = ({
         console.log('payload', payload);
 
         if (payload.type === 'assistant') {
-          console.log('assistant', payload.message.content[0].text);
+          const session = await database.getSession(req.session.id, req.session.key);
+          const totalTokens =
+            payload.message.usage.input_tokens +
+            payload.message.usage.cache_creation_input_tokens +
+            payload.message.usage.cache_read_input_tokens +
+            payload.message.usage.output_tokens;
 
+          await slackClient.chat.postMessage({
+            channel: session.slack.channelId,
+            thread_ts: session.slack.threadTs,
+            text: payload.message.content[0].text, // fallback text
+            blocks: [
+              {
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: payload.message.content[0].text,
+                },
+              },
+              {
+                type: 'context',
+                elements: [
+                  {
+                    type: 'mrkdwn',
+                    text: `🤖 *${payload.message.model}* | 💬 ${totalTokens} tokens`,
+                  },
+                ],
+              },
+            ],
+          });
+        } else if (payload.type === 'result') {
           const session = await database.getSession(req.session.id, req.session.key);
           await slackClient.chat.postMessage({
             channel: session.slack.channelId,
             thread_ts: session.slack.threadTs,
-            text: payload.message.content[0].text,
+            text: 'Session finished',
+            blocks: [
+              {
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: 'Session finished',
+                },
+              },
+            ],
           });
         }
 
