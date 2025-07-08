@@ -29,6 +29,7 @@ const ConfigSchema = z.object({
       apiServerURL: z.string().min(1),
       image: z.string().min(1),
       podSpec: z.object({}).passthrough(),
+      systemPrompt: z.string().optional(),
     }),
   }),
   storage: z.discriminatedUnion('type', [

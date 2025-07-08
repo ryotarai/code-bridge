@@ -33,6 +33,8 @@ export class KubernetesInfra implements Infra {
   }: StartOptions): Promise<void> {
     console.log('Starting Kubernetes pod for session:', sessionId);
 
+    const fullSystemPrompt = (this.config.runner.systemPrompt ?? '') + '\n===\n' + systemPrompt;
+
     // Create a secret
     const secret = await this.k8sApi.createNamespacedSecret({
       namespace: this.config.namespace,
@@ -44,7 +46,7 @@ export class KubernetesInfra implements Infra {
           SESSION_KEY: sessionKey,
           SESSION_UPLOAD_URL: await this.storage.getSessionUploadUrl(sessionId),
           WORKSPACE_UPLOAD_URL: await this.storage.getWorkspaceUploadUrl(sessionId),
-          SYSTEM_PROMPT: systemPrompt,
+          SYSTEM_PROMPT: fullSystemPrompt,
           ...(resumeSessionId
             ? {
                 SESSION_DOWNLOAD_URL: await this.storage.getSessionDownloadUrl(resumeSessionId),
