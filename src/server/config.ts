@@ -3,12 +3,13 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { parse } from 'yaml';
 import { z } from 'zod';
+import { SecretManager } from './secretmanager';
 
 // Load environment variables
 dotenv.config();
 
 // Define the configuration schema using Zod
-const ConfigSchema = z.object({
+export const ConfigSchema = z.object({
   server: z.object({
     host: z.string().default('localhost'),
     port: z.number().int().min(1).max(65535).default(3000),
@@ -83,41 +84,70 @@ const ConfigSchema = z.object({
 // TypeScript type inferred from the schema
 export type Config = z.infer<typeof ConfigSchema>;
 
-// Helper function to load configuration from a specific file
-export function loadConfigFromFile(configPath: string): Config {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let rawConfig: any = {};
+export class ConfigLoader {
+  constructor(private secretManager: SecretManager) {}
 
-  // Try to load from JSON file if specified
-  try {
-    const configFile = resolve(configPath);
-    const fileContent = readFileSync(configFile, 'utf-8');
-    rawConfig = parse(fileContent);
-  } catch (error) {
-    throw new Error(`Failed to load config file ${configPath}: ${error}`);
-  }
+  // Helper function to load configuration from a specific file
+  async loadConfigFromFile(configPath: string): Promise<Config> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let rawConfig: any = {};
 
-  rawConfig.slack ||= {};
-  if (process.env.SLACK_APP_TOKEN) {
-    rawConfig.slack.appToken = process.env.SLACK_APP_TOKEN;
-  }
-  if (process.env.SLACK_BOT_TOKEN) {
-    rawConfig.slack.botToken = process.env.SLACK_BOT_TOKEN;
-  }
-
-  // Validate the configuration
-  try {
-    return ConfigSchema.parse(rawConfig);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errorMessages = error.errors
-        .map((err) => `${err.path.join('.')}: ${err.message}`)
-        .join('\n');
-      throw new Error(`Configuration validation failed:\n${errorMessages}`);
+    // Try to load from JSON file if specified
+    try {
+      const configFile = resolve(configPath);
+      const fileContent = readFileSync(configFile, 'utf-8');
+      rawConfig = parse(fileContent);
+    } catch (error) {
+      throw new Error(`Failed to load config file ${configPath}: ${error}`);
     }
-    throw error;
+
+    // Validate the configuration
+    try {
+      const config = ConfigSchema.parse(rawConfig);
+      return this.fillSecrets(config);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.errors
+          .map((err) => `${err.path.join('.')}: ${err.message}`)
+          .join('\n');
+        throw new Error(`Configuration validation failed:\n${errorMessages}`);
+      }
+      throw error;
+    }
+  }
+
+  private async fillSecrets(config: Config) {
+    config.slack.appToken = await this.resolveValue(config.slack.appToken);
+    config.slack.botToken = await this.resolveValue(config.slack.botToken);
+
+    switch (config.github?.auth.type) {
+      case 'app':
+        config.github.auth.app.clientSecret = await this.resolveValue(
+          config.github.auth.app.clientSecret
+        );
+        config.github.auth.app.privateKey = await this.resolveValue(
+          config.github.auth.app.privateKey
+        );
+        break;
+      case 'static':
+        config.github.auth.token = await this.resolveValue(config.github.auth.token);
+        break;
+    }
+
+    return config;
+  }
+
+  private async resolveValue(value: string): Promise<string> {
+    if (value.startsWith('sm://')) {
+      return this.secretManager.getSecret(value.slice('sm://'.length));
+    }
+    if (value.startsWith('env://')) {
+      const v = process.env[value.slice('env://'.length)];
+      if (v === undefined) {
+        throw new Error(`Environment variable ${value} not found`);
+      }
+      return v;
+    }
+    return value;
   }
 }
-
-// Export the schema for external use (e.g., for generating example configs)
-export { ConfigSchema };

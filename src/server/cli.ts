@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 
 import { Firestore } from '@google-cloud/firestore';
+import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { WebClient } from '@slack/web-api';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { createExampleCommand } from './commands/example.js';
-import { loadConfigFromFile } from './config.js';
+import { ConfigLoader } from './config.js';
 import { FirestoreDatabase } from './database/firestore.js';
 import { GitHub } from './github.js';
 import { KubernetesInfra } from './infra/kubernetes.js';
+import { SecretManager } from './secretmanager.js';
 import { startServer } from './server.js';
 import { SlackServer } from './slack-server.js';
 import { createStorage } from './storage/storage.js';
@@ -26,7 +28,9 @@ program
   .action(async (options) => {
     try {
       // Load configuration
-      const config = loadConfigFromFile(options.config || 'config.yaml');
+      const secretManager = new SecretManager(new SecretManagerServiceClient());
+      const configLoader = new ConfigLoader(secretManager);
+      const config = await configLoader.loadConfigFromFile(options.config || 'config.yaml');
 
       console.log(chalk.green('Starting Code Bridge servers...'));
       console.log(
