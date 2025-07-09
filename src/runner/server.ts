@@ -1,6 +1,7 @@
 import { fastifyConnectPlugin } from '@connectrpc/connect-fastify';
 import { fastify } from 'fastify';
 import routes from './connect.js';
+import { logger } from './logger.js';
 
 export async function startServer({ port, host }: { port: number; host: string }): Promise<void> {
   const server = fastify();
@@ -12,5 +13,5 @@ export async function startServer({ port, host }: { port: number; host: string }
     reply.send('Hello World!');
   });
   await server.listen({ host, port });
-  console.log('server is listening at', server.addresses());
+  logger.info({ addresses: server.addresses() }, 'server is listening at');
 }

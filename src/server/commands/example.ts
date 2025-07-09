@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { logger } from '../index.js';
+import { logger as pinoLogger } from '../logger.js';
 
 export function createExampleCommand(): Command {
   const command = new Command('example');
@@ -15,17 +16,17 @@ export function createExampleCommand(): Command {
         logger('Running in verbose mode', 'info');
       }
       
-      console.log(chalk.cyan('🔧 Example command executed!'));
+      pinoLogger.info(chalk.cyan('🔧 Example command executed!'));
       
       if (options.file) {
-        console.log(chalk.gray(`Input file: ${options.file}`));
+        pinoLogger.info(chalk.gray(`Input file: ${options.file}`));
       }
       
       if (options.output) {
-        console.log(chalk.gray(`Output file: ${options.output}`));
+        pinoLogger.info(chalk.gray(`Output file: ${options.output}`));
       }
       
-      console.log(chalk.green('✅ Command completed successfully!'));
+      pinoLogger.info(chalk.green('✅ Command completed successfully!'));
     });
     
   return command;

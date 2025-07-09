@@ -2,6 +2,7 @@ import type { ConnectRouter } from '@connectrpc/connect';
 import { WebClient } from '@slack/web-api';
 import { ManagerService } from '../proto/manager/v1/service_pb.js';
 import { Database } from './database/database.js';
+import { logger } from './logger.js';
 
 type ClaudeCodeAssistantPayload = {
   type: 'assistant';
@@ -71,17 +72,14 @@ export const buildRoutes = ({
     router.service(ManagerService, {
       // implements rpc CreateClaudeCodeLog
       async createClaudeCodeLog(req) {
-        console.log('CreateClaudeCodeLog called with:', {
-          payloadJson: req.payloadJson,
-          session: req.session,
-        });
+        logger.info({ payloadJson: req.payloadJson, session: req.session }, 'CreateClaudeCodeLog called with');
 
         if (!req.session) {
           throw new Error('Session is required');
         }
 
         const payload = JSON.parse(req.payloadJson) as ClaudeCodeMessagePayload;
-        console.log('payload', payload);
+        logger.info({ payload }, 'payload');
 
         if (payload.type === 'assistant') {
           const session = await database.getSession(req.session.id, req.session.key);
@@ -138,10 +136,7 @@ export const buildRoutes = ({
 
       // implements rpc CreateProgressMessage
       async createProgressMessage(req) {
-        console.log('CreateProgressMessage called with:', {
-          text: req.text,
-          session: req.session,
-        });
+        logger.info({ text: req.text, session: req.session }, 'CreateProgressMessage called with');
 
         // TODO: Implement progress message creation logic
         return {};
@@ -149,12 +144,7 @@ export const buildRoutes = ({
 
       // implements rpc CreateToolApprovalRequest
       async createToolApprovalRequest(req) {
-        console.log('CreateToolApprovalRequest called with:', {
-          requestId: req.requestId,
-          toolName: req.toolName,
-          input: req.input,
-          session: req.session,
-        });
+        logger.info({ requestId: req.requestId, toolName: req.toolName, input: req.input, session: req.session }, 'CreateToolApprovalRequest called with');
 
         if (!req.session) {
           throw new Error('Session is required');

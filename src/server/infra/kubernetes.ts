@@ -2,6 +2,7 @@ import * as k8s from '@kubernetes/client-node';
 import { PassThrough } from 'stream';
 import { Config } from '../config.js';
 import { Database } from '../database/database.js';
+import { logger } from '../logger.js';
 import { Storage } from '../storage/storage.js';
 import { Infra, StartOptions } from './infra.js';
 
@@ -31,7 +32,7 @@ export class KubernetesInfra implements Infra {
     systemPrompt,
     githubToken,
   }: StartOptions): Promise<void> {
-    console.log('Starting Kubernetes pod for session:', sessionId);
+    logger.info({ sessionId }, 'Starting Kubernetes pod for session');
 
     const fullSystemPrompt = (this.config.runner.systemPrompt ?? '') + '\n===\n' + systemPrompt;
 
@@ -111,7 +112,7 @@ export class KubernetesInfra implements Infra {
         spec: podSpec,
       },
     });
-    console.log(pods);
+    logger.info({ pod: pods }, 'Created Kubernetes pod');
 
     secret.metadata?.ownerReferences?.push({
       apiVersion: 'v1',
@@ -144,12 +145,7 @@ export class KubernetesInfra implements Infra {
     requestId: string;
     approve: boolean;
   }): Promise<void> {
-    console.log('KubernetesInfra.approveOrDenyTool:', {
-      namespace,
-      name,
-      requestId,
-      approve,
-    });
+    logger.info({ namespace, name, requestId, approve }, 'KubernetesInfra.approveOrDenyTool');
 
     const execPromise = new Promise<k8s.V1Status>((resolve, reject) => {
       try {
@@ -187,7 +183,7 @@ export class KubernetesInfra implements Infra {
           }),
           'http://localhost:12947/runner.v1.RunnerService/CreateToolApprovalResponse',
         ];
-        console.log('args', args);
+        logger.info({ args }, 'Executing kubectl command');
 
         this.k8sExec
           .exec(
@@ -222,7 +218,7 @@ export class KubernetesInfra implements Infra {
     try {
       await execPromise;
     } catch (err) {
-      console.error('Error approving or denying tool:', err);
+      logger.error({ error: err }, 'Error approving or denying tool');
     }
   }
 }

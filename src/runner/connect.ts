@@ -1,5 +1,6 @@
 import type { ConnectRouter } from '@connectrpc/connect';
 import { CreateToolApprovalResponseRequest, RunnerService } from '../proto/runner/v1/service_pb.js';
+import { logger } from './logger.js';
 
 const approvalResult: Record<string, boolean | undefined> = {};
 
@@ -11,10 +12,7 @@ export default (router: ConnectRouter): ConnectRouter =>
   router.service(RunnerService, {
     // implements rpc CreateClaudeCodeLog
     async createToolApprovalResponse(req: CreateToolApprovalResponseRequest) {
-      console.log('CreateToolApprovalResponse called with:', {
-        requestId: req.requestId,
-        approved: req.approved,
-      });
+      logger.info({ requestId: req.requestId, approved: req.approved }, 'CreateToolApprovalResponse called with');
 
       // TODO: confirm session key?
 

@@ -8,6 +8,7 @@ import {
   CreateProgressMessageRequestSchema,
   ManagerService,
 } from '../proto/manager/v1/service_pb.js';
+import { logger } from './logger.js';
 
 interface ClaudeCodeLog {
   type: string;
@@ -85,7 +86,7 @@ export async function runClaude({
       })
     );
   } catch (error) {
-    console.error('Failed to send progress message:', error);
+    logger.error({ error }, 'Failed to send progress message');
   }
 
   // Send initial input to claude
@@ -106,7 +107,7 @@ export async function runClaude({
     for (const line of lines) {
       if (!line.trim()) continue;
 
-      console.log('Claude output:', line);
+      logger.info({ line }, 'Claude output');
 
       if (line.startsWith('[DEBUG]')) {
         continue;
@@ -136,7 +137,7 @@ export async function runClaude({
           claudeSessionId = claudeCodeLog.session_id;
         }
       } catch (error) {
-        console.error('Failed to parse claude code log:', error);
+        logger.error({ error }, 'Failed to parse claude code log');
       }
     }
   });
@@ -144,16 +145,16 @@ export async function runClaude({
   // Wait for claude to finish
   const exitCode = await new Promise<number | null>((resolve) => {
     claude.on('error', (error) => {
-      console.error('Claude process error:', error);
+      logger.error({ error }, 'Claude process error');
       resolve(null);
     });
     claude.on('exit', resolve);
   });
 
   if (exitCode !== 0) {
-    console.error(`Claude exited with code ${exitCode} (stderr: ${stderrBuf})`);
+    logger.error({ exitCode, stderr: stderrBuf }, 'Claude exited with code %d', exitCode);
   } else {
-    console.log(`Claude completed successfully (session: ${claudeSessionId})`);
+    logger.info({ claudeSessionId }, 'Claude completed successfully');
   }
 
   return {

@@ -10,6 +10,7 @@ import {
   ManagerService,
 } from '../proto/manager/v1/service_pb.js';
 import { isToolApproved } from './connect.js';
+import { logger } from './logger.js';
 
 export async function startMcpServer({
   port,
@@ -40,7 +41,7 @@ export async function startMcpServer({
       input: z.object({}).passthrough().describe('Input'),
     },
     async ({ tool_name, input }) => {
-      console.log('MCP called', { tool_name, input });
+      logger.info({ tool_name, input }, 'MCP called');
 
       // Call CreateToolApprovalRequest
 

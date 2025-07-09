@@ -1,5 +1,6 @@
 import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
+import { logger } from './logger.js';
 
 export async function uploadWorkspace(uploadUrl: string): Promise<void> {
   const workspaceTarGz = '/tmp/workspace.tar.gz';
@@ -7,14 +8,14 @@ export async function uploadWorkspace(uploadUrl: string): Promise<void> {
   try {
     await createTarGz(workspaceTarGz, '/workspace');
   } catch (error) {
-    console.error('failed to create tar.gz', error);
+    logger.error({ error }, 'failed to create tar.gz');
     throw error;
   }
 
   try {
     await uploadFile(uploadUrl, workspaceTarGz);
   } catch (error) {
-    console.error('failed to upload workspace tar.gz', error);
+    logger.error({ error }, 'failed to upload workspace tar.gz');
     throw error;
   }
 }
@@ -38,7 +39,7 @@ async function runTarCommand(args: string[], operationName: string): Promise<voi
         );
       } else {
         if (stderr) {
-          console.warn(`tar ${operationName} command produced stderr:`, stderr);
+          logger.warn({ stderr, operationName }, 'tar command produced stderr');
         }
         resolve();
       }

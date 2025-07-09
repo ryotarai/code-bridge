@@ -1,16 +1,12 @@
 import type { App as AppType, SlackEventMiddlewareArgs } from '@slack/bolt';
 import bolt from '@slack/bolt';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsRepliesResponse.js';
-import dotenv from 'dotenv';
 import { Database } from './database/database.js';
 import { GitHub } from './github.js';
 import { logger } from './index.js';
 import { Infra } from './infra/infra.js';
 
 const { App } = bolt;
-
-// Load environment variables
-dotenv.config();
 
 export interface SlackServerOptions {
   infra: Infra;
@@ -68,7 +64,7 @@ export class SlackServer {
             channel: event.channel,
             user: event.user,
             ...(event.thread_ts ? { thread_ts: event.thread_ts } : {}),
-            text: 'You are not authorized to start a new session',
+            text: 'You are not authorized to start a new session from this thread',
           });
           return;
         }

@@ -1,12 +1,8 @@
-import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { parse } from 'yaml';
 import { z } from 'zod';
 import { SecretManager } from './secretmanager';
-
-// Load environment variables
-dotenv.config();
 
 // Define the configuration schema using Zod
 export const ConfigSchema = z.object({

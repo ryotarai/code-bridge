@@ -3,6 +3,7 @@ import { WebClient } from '@slack/web-api';
 import { fastify } from 'fastify';
 import { buildRoutes } from './connect.js';
 import { Database } from './database/database.js';
+import { logger } from './logger.js';
 
 export async function startServer({
   port,
@@ -24,5 +25,5 @@ export async function startServer({
     reply.send('Hello World!');
   });
   await server.listen({ host, port });
-  console.log('server is listening at', server.addresses());
+  logger.info({ addresses: server.addresses() }, 'server is listening at');
 }

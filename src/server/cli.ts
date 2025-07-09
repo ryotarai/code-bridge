@@ -3,13 +3,13 @@
 import { Firestore } from '@google-cloud/firestore';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { WebClient } from '@slack/web-api';
-import chalk from 'chalk';
 import { Command } from 'commander';
 import { createExampleCommand } from './commands/example.js';
 import { ConfigLoader } from './config.js';
 import { FirestoreDatabase } from './database/firestore.js';
 import { GitHub } from './github.js';
 import { KubernetesInfra } from './infra/kubernetes.js';
+import { logger } from './logger.js';
 import { SecretManager } from './secretmanager.js';
 import { startServer } from './server.js';
 import { SlackServer } from './slack-server.js';
@@ -27,16 +27,16 @@ program
   .option('-c, --config <path>', 'Path to configuration file (JSON)')
   .action(async (options) => {
     try {
+      logger.info('Starting Code Bridge server...');
+
       // Load configuration
       const secretManager = new SecretManager(new SecretManagerServiceClient());
       const configLoader = new ConfigLoader(secretManager);
       const config = await configLoader.loadConfigFromFile(options.config || 'config.yaml');
 
-      console.log(chalk.green('Starting Code Bridge servers...'));
-      console.log(
-        chalk.gray(
-          `Configuration loaded${options.config ? ` from ${options.config}` : ' from environment variables'}`
-        )
+      logger.info('Starting Code Bridge servers...');
+      logger.info(
+        `Configuration loaded${options.config ? ` from ${options.config}` : ' from environment variables'}`
       );
 
       const firestore = new Firestore({
@@ -60,9 +60,9 @@ program
 
       // Handle graceful shutdown
       const shutdown = async (): Promise<void> => {
-        console.log(chalk.yellow('\nShutting down servers...'));
+        logger.info('Shutting down servers...');
         await slackServer.stop();
-        console.log(chalk.gray('Servers stopped'));
+        logger.info('Servers stopped');
         process.exit(0);
       };
 
@@ -73,41 +73,35 @@ program
       await Promise.all([
         // Start Fastify server
         (async (): Promise<void> => {
-          console.log(
-            chalk.blue(`Starting Fastify server on ${config.server.host}:${config.server.port}...`)
-          );
+          logger.info(`Starting Fastify server on ${config.server.host}:${config.server.port}...`);
           await startServer({
             port: config.server.port,
             host: config.server.host,
             slackClient,
             database,
           });
-          console.log(
-            chalk.green(`✓ Fastify server started on ${config.server.host}:${config.server.port}`)
-          );
+          logger.info(`✓ Fastify server started on ${config.server.host}:${config.server.port}`);
         })(),
 
         // Start Slack server
         (async (): Promise<void> => {
-          console.log(chalk.blue('Starting Slack socket mode server...'));
+          logger.info('Starting Slack socket mode server...');
           await slackServer.start();
-          console.log(chalk.green('✓ Slack socket mode server started'));
+          logger.info('✓ Slack socket mode server started');
         })(),
       ]);
 
-      console.log(chalk.green('🚀 All servers are running!'));
-      console.log(chalk.gray('Press Ctrl+C to stop all servers'));
+      logger.info('🚀 All servers are running!');
+      logger.info('Press Ctrl+C to stop all servers');
 
       // Keep the process running
       process.stdin.resume();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(chalk.red('Failed to start servers:'), errorMessage);
+      logger.error('Failed to start servers: %s', errorMessage);
       if (error instanceof Error && error.message.includes('Configuration validation failed')) {
-        console.error(
-          chalk.yellow('💡 Tip: Check your configuration file or environment variables')
-        );
-        console.error(chalk.yellow('💡 Use config.example.json as a reference'));
+        logger.error('💡 Tip: Check your configuration file or environment variables');
+        logger.error('💡 Use config.example.json as a reference');
       }
       process.exit(1);
     }
@@ -117,8 +111,8 @@ program
   .command('version')
   .description('Show status information')
   .action(() => {
-    console.log(chalk.gray(`Version: ${version}`));
-    console.log(chalk.gray(`Node: ${process.version}`));
+    logger.info(`Version: ${version}`);
+    logger.info(`Node: ${process.version}`);
   });
 
 // Add the example command

@@ -4,6 +4,7 @@ import { ManagerService } from '../proto/manager/v1/service_pb.js';
 import { downloadSession, runClaude, uploadSession } from './claude.js';
 import { getEnv } from './env.js';
 import { setupGitHub } from './github.js';
+import { logger } from './logger.js';
 import { startMcpServer } from './mcp.js';
 import { startServer } from './server.js';
 import { downloadWorkspace, uploadWorkspace } from './workspace.js';
@@ -20,12 +21,12 @@ const client = createClient(ManagerService, transport);
 
 // API server
 const apiPort = 12947;
-console.log(`Starting API server on port ${apiPort}`);
+logger.info({ port: apiPort }, 'Starting API server on port %d', apiPort);
 await startServer({ port: apiPort, host: '127.0.0.1' });
 
 // MCP server
 const mcpPort = 12948;
-console.log(`Starting MCP server on port ${mcpPort}`);
+logger.info({ port: mcpPort }, 'Starting MCP server on port %d', mcpPort);
 await startMcpServer({
   port: mcpPort,
   client,
@@ -36,19 +37,19 @@ await startMcpServer({
 // Download session to resume
 let resumeSessionId: string | undefined;
 if (env.sessionDownloadUrl) {
-  console.log('Downloading session to resume');
+  logger.info('Downloading session to resume');
   resumeSessionId = await downloadSession(env.sessionDownloadUrl);
 }
 
 // Download workspace to resume
 if (env.workspaceDownloadUrl) {
-  console.log('Downloading workspace to resume');
+  logger.info('Downloading workspace to resume');
   await downloadWorkspace(env.workspaceDownloadUrl);
 }
 
 // Setup GitHub
 if (env.githubToken) {
-  console.log('Setting up GitHub');
+  logger.info('Setting up GitHub');
   await setupGitHub(env.githubToken);
 }
 
@@ -64,14 +65,14 @@ const { claudeSessionId } = await runClaude({
 });
 
 if (claudeSessionId) {
-  console.log('Uploading Claude Code session');
+  logger.info('Uploading Claude Code session');
   await uploadSession(claudeSessionId, env.sessionUploadUrl);
 } else {
-  console.error('No Claude Code session ID found');
+  logger.error('No Claude Code session ID found');
 }
 
 // Upload workspace
-console.log('Uploading workspace');
+logger.info('Uploading workspace');
 await uploadWorkspace(env.workspaceUploadUrl);
 
 // Exit the process after runClaude completes
