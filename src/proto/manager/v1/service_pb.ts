@@ -2,15 +2,15 @@
 // @generated from file manager/v1/service.proto (package manager.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file manager/v1/service.proto.
  */
 export const file_manager_v1_service: GenFile = /*@__PURE__*/
-  fileDesc("ChhtYW5hZ2VyL3YxL3NlcnZpY2UucHJvdG8SCm1hbmFnZXIudjEiIgoHU2Vzc2lvbhIKCgJpZBgBIAEoCRILCgNrZXkYAiABKAkiWAoaQ3JlYXRlQ2xhdWRlQ29kZUxvZ1JlcXVlc3QSFAoMcGF5bG9hZF9qc29uGAEgASgJEiQKB3Nlc3Npb24YAiABKAsyEy5tYW5hZ2VyLnYxLlNlc3Npb24iHQobQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIlIKHENyZWF0ZVByb2dyZXNzTWVzc2FnZVJlcXVlc3QSDAoEdGV4dBgBIAEoCRIkCgdzZXNzaW9uGAIgASgLMhMubWFuYWdlci52MS5TZXNzaW9uIh8KHUNyZWF0ZVByb2dyZXNzTWVzc2FnZVJlc3BvbnNlIn4KIENyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0EhIKCnJlcXVlc3RfaWQYASABKAkSEQoJdG9vbF9uYW1lGAIgASgJEg0KBWlucHV0GAMgASgJEiQKB3Nlc3Npb24YBCABKAsyEy5tYW5hZ2VyLnYxLlNlc3Npb24iIwohQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlc3BvbnNlMuYCCg5NYW5hZ2VyU2VydmljZRJoChNDcmVhdGVDbGF1ZGVDb2RlTG9nEiYubWFuYWdlci52MS5DcmVhdGVDbGF1ZGVDb2RlTG9nUmVxdWVzdBonLm1hbmFnZXIudjEuQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIgASbgoVQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlEigubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXF1ZXN0GikubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSIAEnoKGUNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3QSLC5tYW5hZ2VyLnYxLkNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0Gi0ubWFuYWdlci52MS5DcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVzcG9uc2UiAEI6WjhnaXRodWIuY29tL3J5b3RhcmFpL2NvZGUtYnJpZGdlL2dlbi9tYW5hZ2VyL3YxO21hbmFnZXJ2MWIGcHJvdG8z");
+  fileDesc("ChhtYW5hZ2VyL3YxL3NlcnZpY2UucHJvdG8SCm1hbmFnZXIudjEiIgoHU2Vzc2lvbhIKCgJpZBgBIAEoCRILCgNrZXkYAiABKAkiWAoaQ3JlYXRlQ2xhdWRlQ29kZUxvZ1JlcXVlc3QSFAoMcGF5bG9hZF9qc29uGAEgASgJEiQKB3Nlc3Npb24YAiABKAsyEy5tYW5hZ2VyLnYxLlNlc3Npb24iHQobQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIlIKHENyZWF0ZVByb2dyZXNzTWVzc2FnZVJlcXVlc3QSDAoEdGV4dBgBIAEoCRIkCgdzZXNzaW9uGAIgASgLMhMubWFuYWdlci52MS5TZXNzaW9uIh8KHUNyZWF0ZVByb2dyZXNzTWVzc2FnZVJlc3BvbnNlIn4KIENyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0EhIKCnJlcXVlc3RfaWQYASABKAkSEQoJdG9vbF9uYW1lGAIgASgJEg0KBWlucHV0GAMgASgJEiQKB3Nlc3Npb24YBCABKAsyEy5tYW5hZ2VyLnYxLlNlc3Npb24iIwohQ3JlYXRlVG9vbEFwcHJvdmFsUmVxdWVzdFJlc3BvbnNlInsKGVVwZGF0ZVNlc3Npb25TdGF0ZVJlcXVlc3QSJAoHc2Vzc2lvbhgBIAEoCzITLm1hbmFnZXIudjEuU2Vzc2lvbhInCgVzdGF0ZRgCIAEoDjIYLm1hbmFnZXIudjEuU2Vzc2lvblN0YXRlEg8KB21lc3NhZ2UYAyABKAkiHAoaVXBkYXRlU2Vzc2lvblN0YXRlUmVzcG9uc2UqmgEKDFNlc3Npb25TdGF0ZRIdChlTRVNTSU9OX1NUQVRFX1VOU1BFQ0lGSUVEEAASGgoWU0VTU0lPTl9TVEFURV9TVEFSVElORxABEhkKFVNFU1NJT05fU1RBVEVfUlVOTklORxACEhoKFlNFU1NJT05fU1RBVEVfRklOSVNIRUQQAxIYChRTRVNTSU9OX1NUQVRFX0ZBSUxFRBAEMs0DCg5NYW5hZ2VyU2VydmljZRJoChNDcmVhdGVDbGF1ZGVDb2RlTG9nEiYubWFuYWdlci52MS5DcmVhdGVDbGF1ZGVDb2RlTG9nUmVxdWVzdBonLm1hbmFnZXIudjEuQ3JlYXRlQ2xhdWRlQ29kZUxvZ1Jlc3BvbnNlIgASbgoVQ3JlYXRlUHJvZ3Jlc3NNZXNzYWdlEigubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXF1ZXN0GikubWFuYWdlci52MS5DcmVhdGVQcm9ncmVzc01lc3NhZ2VSZXNwb25zZSIAEnoKGUNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3QSLC5tYW5hZ2VyLnYxLkNyZWF0ZVRvb2xBcHByb3ZhbFJlcXVlc3RSZXF1ZXN0Gi0ubWFuYWdlci52MS5DcmVhdGVUb29sQXBwcm92YWxSZXF1ZXN0UmVzcG9uc2UiABJlChJVcGRhdGVTZXNzaW9uU3RhdGUSJS5tYW5hZ2VyLnYxLlVwZGF0ZVNlc3Npb25TdGF0ZVJlcXVlc3QaJi5tYW5hZ2VyLnYxLlVwZGF0ZVNlc3Npb25TdGF0ZVJlc3BvbnNlIgBCOlo4Z2l0aHViLmNvbS9yeW90YXJhaS9jb2RlLWJyaWRnZS9nZW4vbWFuYWdlci92MTttYW5hZ2VydjFiBnByb3RvMw");
 
 /**
  * @generated from message manager.v1.Session
@@ -150,6 +150,82 @@ export const CreateToolApprovalRequestResponseSchema: GenMessage<CreateToolAppro
   messageDesc(file_manager_v1_service, 6);
 
 /**
+ * @generated from message manager.v1.UpdateSessionStateRequest
+ */
+export type UpdateSessionStateRequest = Message<"manager.v1.UpdateSessionStateRequest"> & {
+  /**
+   * @generated from field: manager.v1.Session session = 1;
+   */
+  session?: Session;
+
+  /**
+   * @generated from field: manager.v1.SessionState state = 2;
+   */
+  state: SessionState;
+
+  /**
+   * @generated from field: string message = 3;
+   */
+  message: string;
+};
+
+/**
+ * Describes the message manager.v1.UpdateSessionStateRequest.
+ * Use `create(UpdateSessionStateRequestSchema)` to create a new message.
+ */
+export const UpdateSessionStateRequestSchema: GenMessage<UpdateSessionStateRequest> = /*@__PURE__*/
+  messageDesc(file_manager_v1_service, 7);
+
+/**
+ * @generated from message manager.v1.UpdateSessionStateResponse
+ */
+export type UpdateSessionStateResponse = Message<"manager.v1.UpdateSessionStateResponse"> & {
+};
+
+/**
+ * Describes the message manager.v1.UpdateSessionStateResponse.
+ * Use `create(UpdateSessionStateResponseSchema)` to create a new message.
+ */
+export const UpdateSessionStateResponseSchema: GenMessage<UpdateSessionStateResponse> = /*@__PURE__*/
+  messageDesc(file_manager_v1_service, 8);
+
+/**
+ * @generated from enum manager.v1.SessionState
+ */
+export enum SessionState {
+  /**
+   * @generated from enum value: SESSION_STATE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: SESSION_STATE_STARTING = 1;
+   */
+  STARTING = 1,
+
+  /**
+   * @generated from enum value: SESSION_STATE_RUNNING = 2;
+   */
+  RUNNING = 2,
+
+  /**
+   * @generated from enum value: SESSION_STATE_FINISHED = 3;
+   */
+  FINISHED = 3,
+
+  /**
+   * @generated from enum value: SESSION_STATE_FAILED = 4;
+   */
+  FAILED = 4,
+}
+
+/**
+ * Describes the enum manager.v1.SessionState.
+ */
+export const SessionStateSchema: GenEnum<SessionState> = /*@__PURE__*/
+  enumDesc(file_manager_v1_service, 0);
+
+/**
  * @generated from service manager.v1.ManagerService
  */
 export const ManagerService: GenService<{
@@ -176,6 +252,14 @@ export const ManagerService: GenService<{
     methodKind: "unary";
     input: typeof CreateToolApprovalRequestRequestSchema;
     output: typeof CreateToolApprovalRequestResponseSchema;
+  },
+  /**
+   * @generated from rpc manager.v1.ManagerService.UpdateSessionState
+   */
+  updateSessionState: {
+    methodKind: "unary";
+    input: typeof UpdateSessionStateRequestSchema;
+    output: typeof UpdateSessionStateResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_manager_v1_service, 0);

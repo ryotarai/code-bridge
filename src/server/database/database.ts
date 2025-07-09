@@ -1,5 +1,6 @@
 export type DbSession = {
   key: string;
+  state: 'starting' | 'running' | 'finished' | 'failed';
   createdAt: FirebaseFirestore.Timestamp;
   slack: {
     channelId: string;
@@ -35,4 +36,5 @@ export interface Database {
     channelId: string;
     threadTs: string;
   }): Promise<Session | null>;
+  updateSessionState(id: string, state: DbSession['state']): Promise<void>;
 }

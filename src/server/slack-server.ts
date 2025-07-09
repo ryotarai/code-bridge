@@ -3,8 +3,8 @@ import bolt from '@slack/bolt';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsRepliesResponse.js';
 import { Database } from './database/database.js';
 import { GitHub } from './github.js';
-import { logger } from './index.js';
 import { Infra } from './infra/infra.js';
+import { logger } from './logger.js';
 
 const { App } = bolt;
 
@@ -43,7 +43,7 @@ export class SlackServer {
     // Handle app mentions only
     this.app.event('app_mention', async ({ event }: SlackEventMiddlewareArgs<'app_mention'>) => {
       try {
-        logger(
+        logger.info(
           `App mentioned: ${event.text} from user ${event.user} in channel ${event.channel} (event_ts: ${event.event_ts}, thread_ts: ${event.thread_ts})`
         );
 
@@ -57,7 +57,7 @@ export class SlackServer {
               threadTs: event.thread_ts,
             })
           : undefined;
-        logger(`Prev session: ${prevSession?.id}`);
+        logger.info(`Prev session: ${prevSession?.id}`);
 
         if (prevSession && prevSession.slack.userId !== event.user) {
           await this.app.client.chat.postEphemeral({
@@ -99,8 +99,19 @@ export class SlackServer {
           systemPrompt,
           githubToken,
         });
+
+        await this.app.client.chat.postMessage({
+          channel: event.channel,
+          thread_ts: event.thread_ts ?? event.ts,
+          text: 'Session starting...',
+        });
       } catch (error) {
-        logger(`Error handling app mention: ${error}`);
+        logger.error(`Error handling app mention: ${error}`);
+        await this.app.client.chat.postMessage({
+          channel: event.channel,
+          thread_ts: event.thread_ts ?? event.ts,
+          text: `Error starting session: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        });
       }
     });
 
@@ -163,34 +174,34 @@ export class SlackServer {
 
   public async start(): Promise<void> {
     if (this.isRunning) {
-      logger('Slack server is already running');
+      logger.info('Slack server is already running');
       return;
     }
 
     try {
-      logger('Starting Slack Bolt app in Socket Mode...');
+      logger.info('Starting Slack Bolt app in Socket Mode...');
       await this.app.start();
       this.isRunning = true;
-      logger('⚡️ Slack Bolt app started successfully');
+      logger.info('⚡️ Slack Bolt app started successfully');
     } catch (error) {
-      logger(`Failed to start Slack server: ${error}`);
+      logger.error(`Failed to start Slack server: ${error}`);
       throw error;
     }
   }
 
   public async stop(): Promise<void> {
     if (!this.isRunning) {
-      logger('Slack server is not running');
+      logger.info('Slack server is not running');
       return;
     }
 
     try {
-      logger('Stopping Slack Bolt app...');
+      logger.info('Stopping Slack Bolt app...');
       await this.app.stop();
       this.isRunning = false;
-      logger('Slack Bolt app stopped');
+      logger.info('Slack Bolt app stopped');
     } catch (error) {
-      logger(`Failed to stop Slack server: ${error}`);
+      logger.error(`Failed to stop Slack server: ${error}`);
       throw error;
     }
   }

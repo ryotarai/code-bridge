@@ -1,6 +1,6 @@
 import type { ConnectRouter } from '@connectrpc/connect';
-import { WebClient } from '@slack/web-api';
-import { ManagerService } from '../proto/manager/v1/service_pb.js';
+import { KnownBlock, WebClient } from '@slack/web-api';
+import { ManagerService, SessionState } from '../proto/manager/v1/service_pb.js';
 import { Database } from './database/database.js';
 import { logger } from './logger.js';
 
@@ -72,7 +72,10 @@ export const buildRoutes = ({
     router.service(ManagerService, {
       // implements rpc CreateClaudeCodeLog
       async createClaudeCodeLog(req) {
-        logger.info({ payloadJson: req.payloadJson, session: req.session }, 'CreateClaudeCodeLog called with');
+        logger.info(
+          { payloadJson: req.payloadJson, session: req.session },
+          'CreateClaudeCodeLog called with'
+        );
 
         if (!req.session) {
           throw new Error('Session is required');
@@ -144,7 +147,15 @@ export const buildRoutes = ({
 
       // implements rpc CreateToolApprovalRequest
       async createToolApprovalRequest(req) {
-        logger.info({ requestId: req.requestId, toolName: req.toolName, input: req.input, session: req.session }, 'CreateToolApprovalRequest called with');
+        logger.info(
+          {
+            requestId: req.requestId,
+            toolName: req.toolName,
+            input: req.input,
+            session: req.session,
+          },
+          'CreateToolApprovalRequest called with'
+        );
 
         if (!req.session) {
           throw new Error('Session is required');
@@ -210,6 +221,86 @@ export const buildRoutes = ({
         });
 
         // TODO: Implement tool approval request creation logic
+        return {};
+      },
+
+      async updateSessionState(req) {
+        logger.info({ session: req.session, state: req.state }, 'UpdateSessionState called with');
+
+        if (!req.session) {
+          throw new Error('Session is required');
+        }
+
+        const session = await database.getSession(req.session.id, req.session.key);
+
+        const state = (() => {
+          switch (req.state) {
+            case SessionState.STARTING:
+              return 'starting';
+            case SessionState.RUNNING:
+              return 'running';
+            case SessionState.FINISHED:
+              return 'finished';
+            case SessionState.FAILED:
+              return 'failed';
+            default:
+              throw new Error('Invalid session state');
+          }
+        })();
+
+        await database.updateSessionState(session.id, state);
+
+        // Send an ephemeral message to the channel
+        let blocks: KnownBlock[] = [];
+        let fallbackText = '';
+        switch (state) {
+          case 'running':
+            blocks = [
+              {
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: 'Session running...',
+                },
+              },
+            ];
+            fallbackText = 'Session running...';
+            break;
+          case 'finished':
+            blocks = [
+              {
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: 'Session finished',
+                },
+              },
+            ];
+            fallbackText = 'Session finished';
+            break;
+          case 'failed':
+            blocks = [
+              {
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: `Session failed${req.message ? `: ${req.message}` : ''}`,
+                },
+              },
+            ];
+            fallbackText = `Session failed${req.message ? `: ${req.message}` : ''}`;
+            break;
+        }
+
+        if (blocks.length > 0) {
+          await slackClient.chat.postMessage({
+            channel: session.slack.channelId,
+            thread_ts: session.slack.threadTs,
+            text: fallbackText,
+            blocks,
+          });
+        }
+
         return {};
       },
     });

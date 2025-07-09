@@ -41,6 +41,7 @@ export class FirestoreDatabase implements Database {
     const dbSession: DbSession = {
       key: crypto.randomUUID(),
       createdAt: Timestamp.now(),
+      state: 'starting',
       slack: {
         channelId,
         threadTs,
@@ -84,5 +85,14 @@ export class FirestoreDatabase implements Database {
       });
 
     return matchingSessions.length > 0 ? matchingSessions[0] : null;
+  }
+
+  async updateSessionState(id: string, state: DbSession['state']): Promise<void> {
+    await this.client
+      .collection('sessions')
+      .doc(id)
+      .update({
+        state,
+      } as Partial<DbSession>);
   }
 }

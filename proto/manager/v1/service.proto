@@ -9,6 +9,14 @@ message Session {
   string key = 2;
 }
 
+enum SessionState {
+  SESSION_STATE_UNSPECIFIED = 0;
+  SESSION_STATE_STARTING = 1;
+  SESSION_STATE_RUNNING = 2;
+  SESSION_STATE_FINISHED = 3;
+  SESSION_STATE_FAILED = 4;
+}
+
 message CreateClaudeCodeLogRequest {
     string payload_json = 1;
     Session session = 2;
@@ -35,8 +43,18 @@ message CreateToolApprovalRequestRequest {
 message CreateToolApprovalRequestResponse {
 }
 
+message UpdateSessionStateRequest {
+  Session session = 1;
+  SessionState state = 2;
+  string message = 3;
+}
+
+message UpdateSessionStateResponse {
+}
+
 service ManagerService {
   rpc CreateClaudeCodeLog(CreateClaudeCodeLogRequest) returns (CreateClaudeCodeLogResponse) {}
   rpc CreateProgressMessage(CreateProgressMessageRequest) returns (CreateProgressMessageResponse) {}
   rpc CreateToolApprovalRequest(CreateToolApprovalRequestRequest) returns (CreateToolApprovalRequestResponse) {}
+  rpc UpdateSessionState(UpdateSessionStateRequest) returns (UpdateSessionStateResponse) {}
 }
