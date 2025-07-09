@@ -52,13 +52,22 @@ const ConfigSchema = z.object({
   ]),
   github: z
     .object({
-      auth: z.object({
-        appId: z.number().min(1),
-        clientId: z.string().min(1),
-        clientSecret: z.string().min(1),
-        privateKey: z.string().min(1),
-        installationId: z.number().min(1),
-      }),
+      auth: z.discriminatedUnion('type', [
+        z.object({
+          type: z.literal('app'),
+          app: z.object({
+            appId: z.number().min(1),
+            clientId: z.string().min(1),
+            clientSecret: z.string().min(1),
+            privateKey: z.string().min(1),
+            installationId: z.number().min(1),
+          }),
+        }),
+        z.object({
+          type: z.literal('static'),
+          token: z.string().min(1),
+        }),
+      ]),
       repositories: z
         .array(
           z.object({

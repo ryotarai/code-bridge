@@ -92,7 +92,7 @@ export class SlackServer {
 
         let githubToken: string | undefined;
         if (this.github) {
-          githubToken = await this.github.getInstallationTokenForUser(event.user);
+          githubToken = await this.github.getTokenForUser(event.user);
         }
 
         await this.infra.start({

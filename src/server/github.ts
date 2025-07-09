@@ -2,32 +2,37 @@ import { createAppAuth } from '@octokit/auth-app';
 import { Config } from './config.js';
 
 export class GitHub {
-  private appAuth: ReturnType<typeof createAppAuth>;
+  constructor(private config: Exclude<Config['github'], undefined>) {}
 
-  constructor(private config: Exclude<Config['github'], undefined>) {
-    this.appAuth = createAppAuth({
-      appId: this.config.auth.appId,
-      privateKey: this.config.auth.privateKey,
-      clientId: this.config.auth.clientId,
-      clientSecret: this.config.auth.clientSecret,
-    });
-  }
+  async getTokenForUser(slackUserId: string): Promise<string | undefined> {
+    switch (this.config.auth.type) {
+      case 'app':
+        const appAuth = createAppAuth({
+          appId: this.config.auth.app.appId,
+          privateKey: this.config.auth.app.privateKey,
+          clientId: this.config.auth.app.clientId,
+          clientSecret: this.config.auth.app.clientSecret,
+        });
+        const repositoryIds = this.config.repositories
+          ?.filter((repository) => repository.writableSlackUserIds.includes(slackUserId))
+          .map((repository) => repository.repositoryId);
 
-  async getInstallationTokenForUser(slackUserId: string): Promise<string | undefined> {
-    const repositoryIds = this.config.repositories
-      ?.filter((repository) => repository.writableSlackUserIds.includes(slackUserId))
-      .map((repository) => repository.repositoryId);
+        if (!repositoryIds || repositoryIds.length === 0) {
+          return undefined;
+        }
 
-    if (!repositoryIds || repositoryIds.length === 0) {
-      return undefined;
+        const token = await appAuth({
+          type: 'installation',
+          repositoryIds,
+          installationId: this.config.auth.app.installationId,
+        });
+
+        return token.token;
+      case 'static':
+        return this.config.auth.token;
+      default:
+        this.config.auth satisfies never;
+        throw new Error('Unsupported auth type');
     }
-
-    const token = await this.appAuth({
-      type: 'installation',
-      repositoryIds,
-      installationId: this.config.auth.installationId,
-    });
-
-    return token.token;
   }
 }
