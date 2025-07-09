@@ -4,7 +4,6 @@ import { Firestore } from '@google-cloud/firestore';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { WebClient } from '@slack/web-api';
 import { Command } from 'commander';
-import { createExampleCommand } from './commands/example.js';
 import { ConfigLoader } from './config.js';
 import { FirestoreDatabase } from './database/firestore.js';
 import { GitHub } from './github.js';
@@ -114,8 +113,5 @@ program
     logger.info(`Version: ${version}`);
     logger.info(`Node: ${process.version}`);
   });
-
-// Add the example command
-program.addCommand(createExampleCommand());
 
 program.parse();
