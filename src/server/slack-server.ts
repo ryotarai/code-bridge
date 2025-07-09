@@ -42,6 +42,8 @@ export class SlackServer {
   private setupEventHandlers(): void {
     // Handle app mentions only
     this.app.event('app_mention', async ({ event }: SlackEventMiddlewareArgs<'app_mention'>) => {
+      let targetThreadTs: string | undefined;
+
       try {
         logger.info(
           `App mentioned: ${event.text} from user ${event.user} in channel ${event.channel} (event_ts: ${event.event_ts}, thread_ts: ${event.thread_ts})`
@@ -69,9 +71,50 @@ export class SlackServer {
           return;
         }
 
+        if (event.thread_ts) {
+          const originalMessagePermalink = await this.app.client.chat.getPermalink({
+            channel: event.channel,
+            message_ts: event.ts,
+          });
+
+          if (!originalMessagePermalink.ok || !originalMessagePermalink.permalink) {
+            throw new Error('Failed to get original message permalink');
+          }
+
+          // send a new message to the channel to start a thread
+          const newMessage = await this.app.client.chat.postMessage({
+            channel: event.channel,
+            text: `<@${event.user}> Session started from <${originalMessagePermalink.permalink}|this message>`,
+          });
+
+          if (!newMessage.ok || !newMessage.ts) {
+            logger.error({ newMessage }, 'Failed to send new message');
+            throw new Error('Failed to send new message');
+          }
+
+          const newMessagePermalink = await this.app.client.chat.getPermalink({
+            channel: event.channel,
+            message_ts: newMessage.ts,
+          });
+
+          if (!newMessagePermalink.ok || !newMessagePermalink.permalink) {
+            throw new Error('Failed to get new message permalink');
+          }
+
+          await this.app.client.chat.postMessage({
+            channel: event.channel,
+            thread_ts: event.thread_ts,
+            text: `<${newMessagePermalink.permalink}|Session started>`,
+          });
+
+          targetThreadTs = newMessage.ts;
+        } else {
+          targetThreadTs = event.ts;
+        }
+
         const session = await this.database.createSessionFromSlackThread({
           channelId: event.channel,
-          threadTs: event.thread_ts ?? event.ts,
+          threadTs: targetThreadTs,
           userId: event.user,
         });
 
@@ -103,7 +146,7 @@ export class SlackServer {
         const message = `Session starting...`;
         await this.app.client.chat.postMessage({
           channel: event.channel,
-          thread_ts: event.thread_ts ?? event.ts,
+          thread_ts: targetThreadTs,
           text: message,
           blocks: [
             {
@@ -123,7 +166,7 @@ export class SlackServer {
         const message = `Error starting session: ${error instanceof Error ? error.message : 'Unknown error'}`;
         await this.app.client.chat.postMessage({
           channel: event.channel,
-          thread_ts: event.thread_ts ?? event.ts,
+          thread_ts: targetThreadTs ?? event.thread_ts ?? event.ts,
           text: message,
           blocks: [
             {
