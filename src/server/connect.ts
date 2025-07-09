@@ -1,5 +1,5 @@
 import type { ConnectRouter } from '@connectrpc/connect';
-import { KnownBlock, WebClient } from '@slack/web-api';
+import { WebClient } from '@slack/web-api';
 import { ManagerService, SessionState } from '../proto/manager/v1/service_pb.js';
 import { Database } from './database/database.js';
 import { logger } from './logger.js';
@@ -54,6 +54,12 @@ type ClaudeCodeResultPayload = {
   duration_api_ms: number;
   num_turns: number;
   total_cost_usd: number;
+  usage: {
+    input_tokens: number;
+    cache_creation_input_tokens: number;
+    cache_read_input_tokens: number;
+    output_tokens: number;
+  };
 };
 
 type ClaudeCodeMessagePayload =
@@ -86,12 +92,6 @@ export const buildRoutes = ({
 
         if (payload.type === 'assistant') {
           const session = await database.getSession(req.session.id, req.session.key);
-          const totalTokens =
-            payload.message.usage.input_tokens +
-            payload.message.usage.cache_creation_input_tokens +
-            payload.message.usage.cache_read_input_tokens +
-            payload.message.usage.output_tokens;
-
           await slackClient.chat.postMessage({
             channel: session.slack.channelId,
             thread_ts: session.slack.threadTs,
@@ -102,31 +102,6 @@ export const buildRoutes = ({
                 text: {
                   type: 'mrkdwn',
                   text: payload.message.content[0].text,
-                },
-              },
-              {
-                type: 'context',
-                elements: [
-                  {
-                    type: 'mrkdwn',
-                    text: `🤖 *${payload.message.model}* | 💬 ${totalTokens} tokens`,
-                  },
-                ],
-              },
-            ],
-          });
-        } else if (payload.type === 'result') {
-          const session = await database.getSession(req.session.id, req.session.key);
-          await slackClient.chat.postMessage({
-            channel: session.slack.channelId,
-            thread_ts: session.slack.threadTs,
-            text: 'Session finished',
-            blocks: [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: 'Session finished',
                 },
               },
             ],
@@ -251,53 +226,35 @@ export const buildRoutes = ({
         await database.updateSessionState(session.id, state);
 
         // Send an ephemeral message to the channel
-        let blocks: KnownBlock[] = [];
-        let fallbackText = '';
+        let text: string | undefined;
         switch (state) {
           case 'running':
-            blocks = [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: 'Session running...',
-                },
-              },
-            ];
-            fallbackText = 'Session running...';
+            text = 'Session running...';
             break;
           case 'finished':
-            blocks = [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: 'Session finished',
-                },
-              },
-            ];
-            fallbackText = 'Session finished';
+            text = 'Session finished';
             break;
           case 'failed':
-            blocks = [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: `Session failed${req.message ? `: ${req.message}` : ''}`,
-                },
-              },
-            ];
-            fallbackText = `Session failed${req.message ? `: ${req.message}` : ''}`;
+            text = `Session failed${req.message ? `: ${req.message}` : ''}`;
             break;
         }
 
-        if (blocks.length > 0) {
+        if (text) {
           await slackClient.chat.postMessage({
             channel: session.slack.channelId,
             thread_ts: session.slack.threadTs,
-            text: fallbackText,
-            blocks,
+            text,
+            blocks: [
+              {
+                type: 'context',
+                elements: [
+                  {
+                    type: 'mrkdwn',
+                    text: `:information_source: ${text}`,
+                  },
+                ],
+              },
+            ],
           });
         }
 

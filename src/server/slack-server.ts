@@ -100,17 +100,42 @@ export class SlackServer {
           githubToken,
         });
 
+        const message = `Session starting...`;
         await this.app.client.chat.postMessage({
           channel: event.channel,
           thread_ts: event.thread_ts ?? event.ts,
-          text: 'Session starting...',
+          text: message,
+          blocks: [
+            {
+              type: 'context',
+              elements: [
+                {
+                  type: 'mrkdwn',
+                  text: `:information_source: ${message}`,
+                },
+              ],
+            },
+          ],
         });
       } catch (error) {
         logger.error(`Error handling app mention: ${error}`);
+
+        const message = `Error starting session: ${error instanceof Error ? error.message : 'Unknown error'}`;
         await this.app.client.chat.postMessage({
           channel: event.channel,
           thread_ts: event.thread_ts ?? event.ts,
-          text: `Error starting session: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          text: message,
+          blocks: [
+            {
+              type: 'context',
+              elements: [
+                {
+                  type: 'mrkdwn',
+                  text: `:information_source: ${message}`,
+                },
+              ],
+            },
+          ],
         });
       }
     });
