@@ -29,7 +29,8 @@ TBW
 
 - **🔐 Enhanced GitHub User Authentication**
 - **🚀 Extended API Capabilities** 
-- **⏸️ Session Interruption** (セッションの途中でのinterrupt)
+- **⏸️ Session Interruption**
+- **🔗 code-server integration**
 
 ## License
 
