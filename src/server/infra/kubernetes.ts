@@ -62,6 +62,15 @@ export class KubernetesInfra implements Infra {
     // Create a pod (deep copy)
     const podSpec = JSON.parse(JSON.stringify(this.config.runner.podSpec)) as k8s.V1PodSpec;
 
+    if (!podSpec.volumes) {
+      podSpec.volumes = [];
+    }
+
+    podSpec.volumes.push({
+      name: 'code-bridge-workspace',
+      emptyDir: {},
+    });
+
     const mainContainer = ((): k8s.V1Container => {
       for (const container of podSpec.containers) {
         if (container.name === 'main') {
@@ -99,6 +108,14 @@ export class KubernetesInfra implements Infra {
       secretRef: {
         name: secret.metadata!.name!,
       },
+    });
+
+    if (!mainContainer.volumeMounts) {
+      mainContainer.volumeMounts = [];
+    }
+    mainContainer.volumeMounts.push({
+      name: 'code-bridge-workspace',
+      mountPath: '/workspace',
     });
 
     podSpec.restartPolicy = 'Never';
