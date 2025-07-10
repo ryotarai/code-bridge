@@ -1,94 +1,36 @@
 # Code Bridge
 
-A Slack bot built with Slack Bolt framework, Node.js and TypeScript.
+**Claude Code + Slack = 🔥**
 
-## Features
+Integrate [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with Slack for collaborative AI development. Mention the bot in any channel to start secure Claude Code sessions with tool approval workflows.
 
-- ⚡ **Slack Bolt Framework**: Official Slack framework for robust apps
-- 🎯 **App Mentions Only**: Responds specifically to @mentions  
-- ✅ **Socket Mode**: No need for public URLs or webhooks
-- ✅ **TypeScript**: Full type safety and modern ES modules
-- ✅ **CLI Interface**: Easy-to-use command-line interface
-- ✅ **Graceful Shutdown**: Proper cleanup on exit
-- ✅ **Development Tools**: ESLint, Prettier, and hot reload
+## Key Features
 
-## Setup
+- **🤖 Slack Integration** - Mention `@code-bridge` to start Claude Code sessions
+- **🔐 Secure Tool Approval** - Interactive buttons for approving dangerous operations  
+- **📱 Session Continuity** - Resume sessions and persist workspace state
+- **☁️ Kubernetes Backend** - Isolated pods for each session
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+## Quick Start
 
-2. **Set up your Slack app:**
-   - Create a new Slack app at https://api.slack.com/apps
-   - Enable Socket Mode in your app settings  
-   - Get your App-Level Token (starts with `xapp-`) - needed for Socket Mode
-   - Get your Bot User OAuth Token (starts with `xoxb-`)
-
-3. **Create environment file:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your actual tokens
-   ```
+TBW
 
 ## Usage
 
-### Start the server
-```bash
-# Development mode
-npm run dev:server start
+1. **Start session**: Mention `@code-bridge` in any Slack channel
+2. **Approve tools**: Click ✅/❌ buttons when Claude Code requests dangerous operations
+3. **Continue working**: Thread maintains context, files persist across interactions
 
-# Production mode
-npm run build
-npm run server start
-```
+## Configuration
 
-### Available Commands
-```bash
-# Start Slack socket server
-code-bridge start
+TBW
 
-# Show version information  
-code-bridge version
+## Planned Features
 
-# Example command for testing
-code-bridge example
-```
+- **🔐 Enhanced GitHub User Authentication**
+- **🚀 Extended API Capabilities** 
+- **⏸️ Session Interruption** (セッションの途中でのinterrupt)
 
-## Bot Interactions
+## License
 
-- **App Mentions Only**: Mention the bot (`@YourBot`) → Bot responds with a personalized greeting
-- **Threaded Responses**: Bot replies in thread to keep conversations organized
-
-## Environment Variables
-
-- `SLACK_APP_TOKEN` - Your Slack app's App-Level Token for Socket Mode (required)
-- `SLACK_BOT_TOKEN` - Your Slack app's Bot User OAuth Token (required)  
-- `NODE_ENV` - Environment (development/production)
-
-Note: `SLACK_SIGNING_SECRET` is not required when using Socket Mode.
-
-## Development Scripts
-
-```bash
-npm run dev:server     # Run server in development mode
-npm run build          # Build TypeScript to dist/
-npm run server         # Run built server CLI
-npm run lint           # ESLint
-npm run format         # Prettier
-npm run typecheck      # TypeScript type checking
-```
-
-## Project Structure
-
-```
-src/
-├── server/
-│   ├── cli.ts           # Server CLI entry point
-│   ├── slack-server.ts  # Slack Bolt app implementation
-│   ├── index.ts         # Utilities (logger, etc.)
-│   └── commands/
-│       └── example.ts   # Example command
-├── runner/              # Future: task runner
-└── shared/              # Shared utilities
-```
+MIT License
