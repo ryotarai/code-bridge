@@ -76,7 +76,7 @@ async function uploadFile(uploadUrl: string, filePath: string): Promise<void> {
 }
 
 async function extractTarGz(src: string, dest: string): Promise<void> {
-  return runTarCommand(['-zxf', src, '-C', dest], 'extract tar.gz');
+  return runTarCommand(['--no-overwrite-dir', '-zxf', src, '-C', dest], 'extract tar.gz');
 }
 
 export async function downloadWorkspace(downloadUrl: string): Promise<void> {
