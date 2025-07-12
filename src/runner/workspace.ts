@@ -4,7 +4,7 @@ import path from 'path';
 import { logger } from './logger.js';
 
 export async function uploadWorkspace(uploadUrl: string): Promise<void> {
-  const workspaceTarGz = '/tmp/workspace.tar.gz';
+  const workspaceTarGz = '/home/runner/workspace.tar.gz';
 
   try {
     await createTarGz(workspaceTarGz, '/workspace');
@@ -97,7 +97,7 @@ async function moveAllFiles(srcDir: string, destDir: string): Promise<void> {
 }
 
 export async function downloadWorkspace(downloadUrl: string): Promise<void> {
-  const workspaceTarGz = '/tmp/downloaded-workspace.tar.gz';
+  const workspaceTarGz = '/home/runner/downloaded-workspace.tar.gz';
   const extractTmpDir = '/workspace/__code_bridge_extract_tmp';
 
   try {

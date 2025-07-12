@@ -70,6 +70,14 @@ export class KubernetesInfra implements Infra {
       name: 'code-bridge-workspace',
       emptyDir: {},
     });
+    podSpec.volumes.push({
+      name: 'code-bridge-home',
+      emptyDir: {},
+    });
+    podSpec.volumes.push({
+      name: 'code-bridge-tmp',
+      emptyDir: {},
+    });
 
     const mainContainer = ((): k8s.V1Container => {
       for (const container of podSpec.containers) {
@@ -117,8 +125,28 @@ export class KubernetesInfra implements Infra {
       name: 'code-bridge-workspace',
       mountPath: '/workspace',
     });
+    mainContainer.volumeMounts.push({
+      name: 'code-bridge-home',
+      mountPath: '/home/runner',
+    });
+    mainContainer.volumeMounts.push({
+      name: 'code-bridge-tmp',
+      mountPath: '/tmp',
+    });
+
+    if (!mainContainer.securityContext) {
+      mainContainer.securityContext = {};
+    }
+    mainContainer.securityContext.readOnlyRootFilesystem = true;
 
     podSpec.restartPolicy = 'Never';
+    if (!podSpec.securityContext) {
+      podSpec.securityContext = {};
+    }
+    podSpec.securityContext.runAsNonRoot = true;
+    podSpec.securityContext.seccompProfile = {
+      type: 'RuntimeDefault',
+    };
 
     const pods = await this.k8sApi.createNamespacedPod({
       namespace: this.config.namespace,

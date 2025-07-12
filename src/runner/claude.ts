@@ -34,7 +34,7 @@ export async function runClaude({
   systemPrompt: string;
 }): Promise<{ exitCode: number | null; claudeSessionId: string | undefined }> {
   // Create MCP config
-  const mcpConfigPath = '/tmp/mcp-config.json';
+  const mcpConfigPath = '/home/runner/mcp-config.json';
   const mcpConfig = {
     mcpServers: {
       'permission-prompt': {

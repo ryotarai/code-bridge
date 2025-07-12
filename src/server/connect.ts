@@ -11,14 +11,20 @@ type ClaudeCodeAssistantPayload = {
     type: 'message';
     role: 'assistant';
     model: string;
-    content: {
-      type: 'text';
-      text: string;
-    }[];
+    content: Array<
+      | {
+          type: 'text';
+          text: string;
+        }
+      | {
+          type: 'tool_use';
+          id: string;
+          name: string;
+          input: Record<string, any>;
+        }
+    >;
     stop_reason: string | null;
     stop_sequence: number | null;
-    parent_tool_use_id: string | null;
-    session_id: string;
     usage: {
       input_tokens: number;
       cache_creation_input_tokens: number;
@@ -26,6 +32,8 @@ type ClaudeCodeAssistantPayload = {
       output_tokens: number;
     };
   };
+  parent_tool_use_id: string | null;
+  session_id: string;
 };
 
 type ClaudeCodeSystemPayload = {
@@ -92,23 +100,33 @@ export const buildRoutes = ({
 
         if (payload.type === 'assistant') {
           const session = await database.getSession(req.session.id, req.session.key);
-          await slackClient.chat.postMessage({
-            channel: session.slack.channelId,
-            thread_ts: session.slack.threadTs,
-            text: payload.message.content[0].text, // fallback text
-            blocks: [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: payload.message.content[0].text,
+
+          for (const content of payload.message.content) {
+            // Determine the message text based on content type
+            let messageText: string;
+            if (content.type === 'text') {
+              messageText = content.text;
+            } else {
+              continue;
+            }
+
+            await slackClient.chat.postMessage({
+              channel: session.slack.channelId,
+              thread_ts: session.slack.threadTs,
+              text: messageText, // fallback text
+              blocks: [
+                {
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: messageText,
+                  },
                 },
-              },
-            ],
-          });
+              ],
+            });
+          }
         }
 
-        // TODO: Implement Claude Code log creation logic
         return {};
       },
 

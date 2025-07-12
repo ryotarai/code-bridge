@@ -22,7 +22,7 @@ RUN npm run build
 FROM node:24 AS production
 
 # Run as runner user
-RUN groupadd -r runner && useradd -r -g runner -m -d /home/runner runner
+RUN groupadd -g 10000 -r runner && useradd -u 10000 -r -g runner -m -d /home/runner runner
 
 # /workspace
 RUN mkdir -p /app && chown runner:runner /app
@@ -50,7 +50,7 @@ FROM production AS server
 # Expose the port (default from typical server setup)
 EXPOSE 3000
 
-USER runner
+USER 10000:10000
 
 # Set the default command to start the server
 ENTRYPOINT ["node", "/app/dist/server/cli.js"]
@@ -76,7 +76,7 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
 
 WORKDIR /workspace
 
-USER runner
+USER 10000:10000
 
 # Set the default command to start the runner
 ENTRYPOINT ["node", "/app/dist/runner/main.js"]
