@@ -49,30 +49,33 @@ export const ConfigSchema = z.object({
   ]),
   github: z
     .object({
-      auth: z.discriminatedUnion('type', [
-        z.object({
-          type: z.literal('app'),
-          app: z.object({
-            appId: z.number().min(1),
-            clientId: z.string().min(1),
-            clientSecret: z.string().min(1),
-            privateKey: z.string().min(1),
-            installationId: z.number().min(1),
-          }),
-        }),
-        z.object({
-          type: z.literal('static'),
-          token: z.string().min(1),
-        }),
-      ]),
-      repositories: z
-        .array(
+      auth: z.array(
+        z.discriminatedUnion('type', [
           z.object({
-            repositoryId: z.number().min(1),
-            writableSlackUserIds: z.array(z.string().min(1)),
-          })
-        )
-        .optional(),
+            type: z.literal('static'),
+            static: z.object({
+              token: z.string().min(1),
+              slackUserIds: z.array(z.string().min(1)),
+            }),
+          }),
+          z.object({
+            type: z.literal('installation'),
+            installation: z.object({
+              appId: z.number().min(1),
+              installationId: z.number().min(1),
+              clientId: z.string().min(1),
+              clientSecret: z.string().min(1),
+              privateKey: z.string().min(1),
+              repositories: z.array(
+                z.object({
+                  repositoryId: z.number().min(1),
+                  slackUserIds: z.array(z.string().min(1)),
+                })
+              ),
+            }),
+          }),
+        ])
+      ),
     })
     .optional(),
 });
@@ -116,18 +119,20 @@ export class ConfigLoader {
     config.slack.appToken = await this.resolveValue(config.slack.appToken);
     config.slack.botToken = await this.resolveValue(config.slack.botToken);
 
-    switch (config.github?.auth.type) {
-      case 'app':
-        config.github.auth.app.clientSecret = await this.resolveValue(
-          config.github.auth.app.clientSecret
-        );
-        config.github.auth.app.privateKey = await this.resolveValue(
-          config.github.auth.app.privateKey
-        );
-        break;
-      case 'static':
-        config.github.auth.token = await this.resolveValue(config.github.auth.token);
-        break;
+    if (config.github?.auth) {
+      for (const auth of config.github.auth) {
+        switch (auth.type) {
+          case 'installation':
+            auth.installation.clientSecret = await this.resolveValue(
+              auth.installation.clientSecret
+            );
+            auth.installation.privateKey = await this.resolveValue(auth.installation.privateKey);
+            break;
+          case 'static':
+            auth.static.token = await this.resolveValue(auth.static.token);
+            break;
+        }
+      }
     }
 
     return config;

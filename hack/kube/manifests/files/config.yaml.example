@@ -35,15 +35,23 @@ storage:
 
 github:
   auth:
-    appId: 
-    installationId: 
-    clientId: ''
-    clientSecret: ''
-    privateKey: |
-      -----BEGIN RSA PRIVATE KEY-----
-      ...
-      -----END RSA PRIVATE KEY-----
-  repositories:
-    - repositoryId: 1
-      writableSlackUserIds:
-        - U09341C2UGY
+  - type: static
+    static:
+      token: ''
+      slackUserIds:
+        - U...
+  - type: installation
+    installation:
+      appId: 
+      installationId: 
+      clientId: ''
+      clientSecret: ''
+      privateKey: |
+        -----BEGIN RSA PRIVATE KEY-----
+        ...
+        -----END RSA PRIVATE KEY-----
+      repositories:
+        - repositoryId: 1
+          slackUserIds:
+            - U...
+  
