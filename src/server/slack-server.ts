@@ -1,4 +1,10 @@
-import type { App as AppType, SlackEventMiddlewareArgs } from '@slack/bolt';
+import type {
+  App as AppType,
+  BlockAction,
+  ButtonAction,
+  SlackActionMiddlewareArgs,
+  SlackEventMiddlewareArgs,
+} from '@slack/bolt';
 import bolt from '@slack/bolt';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsRepliesResponse.js';
 import { Database } from './database/database.js';
@@ -193,50 +199,74 @@ export class SlackServer {
         approve: false,
       },
     ].forEach(({ actionId, approve }) => {
-      this.app.action(actionId, async ({ ack, action, context, body }) => {
-        await ack();
-        if (!context.userId) {
-          throw new Error('User ID is required');
-        }
-        if (!body.channel?.id) {
-          throw new Error('Channel ID is required');
-        }
+      this.app.action(
+        actionId,
+        async ({ ack, action, body }: SlackActionMiddlewareArgs<BlockAction<ButtonAction>>) => {
+          await ack();
+          if (!body.channel?.id) {
+            throw new Error('Channel ID is required');
+          }
 
-        const postEphemeral = async (text: string) => {
-          await this.app.client.chat.postEphemeral({
-            channel: body.channel!.id!,
-            user: body.user.id,
-            thread_ts: (body as any).message.thread_ts,
-            text,
-          });
-        };
+          const postEphemeral = async (text: string) => {
+            await this.app.client.chat.postEphemeral({
+              channel: body.channel!.id!,
+              user: body.user.id,
+              thread_ts: (body as any).message.thread_ts,
+              text,
+            });
+          };
 
-        if (action.type === 'button') {
-          if (!action.value) {
-            throw new Error('No value found in action');
+          if (action.type === 'button') {
+            if (!action.value) {
+              throw new Error('No value found in action');
+            }
+            const actionValue = JSON.parse(action.value);
+            const session = await this.database.getSession(
+              actionValue.sessionId,
+              actionValue.sessionKey
+            );
+            if (session.slack.userId !== body.user.id) {
+              // Send ephemeral message to the user
+              await postEphemeral('You are not authorized to approve or deny this tool');
+              return;
+            }
+            if (!session.pod) {
+              await postEphemeral('Pod is not started yet');
+              return;
+            }
+            await this.infra.approveOrDenyTool({
+              namespace: session.pod.namespace,
+              name: session.pod.name,
+              requestId: actionValue.requestId,
+              approve,
+            });
+
+            // Update the message to disable buttons and show status
+            if (body.message && body.message.ts) {
+              const statusText = approve ? 'Approved' : 'Denied';
+              const statusEmoji = approve ? ':white_check_mark:' : ':x:';
+
+              await this.app.client.chat.update({
+                channel: body.channel!.id!,
+                ts: body.message.ts,
+                text: `Tool ${statusText.toLowerCase()}`,
+                blocks: [
+                  ...(body.message.blocks || []).filter((block: any) => block.type !== 'actions'),
+                  {
+                    type: 'context',
+                    elements: [
+                      {
+                        type: 'mrkdwn',
+                        text: `${statusEmoji} ${statusText} by <@${body.user.id}>`,
+                      },
+                    ],
+                  },
+                ],
+              });
+            }
           }
-          const actionValue = JSON.parse(action.value);
-          const session = await this.database.getSession(
-            actionValue.sessionId,
-            actionValue.sessionKey
-          );
-          if (session.slack.userId !== context.userId) {
-            // Send ephemeral message to the user
-            await postEphemeral('You are not authorized to approve or deny this tool');
-            return;
-          }
-          if (!session.pod) {
-            await postEphemeral('Pod is not started yet');
-            return;
-          }
-          await this.infra.approveOrDenyTool({
-            namespace: session.pod.namespace,
-            name: session.pod.name,
-            requestId: actionValue.requestId,
-            approve,
-          });
         }
-      });
+      );
     });
   }
 
