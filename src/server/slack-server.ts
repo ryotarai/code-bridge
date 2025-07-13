@@ -81,6 +81,15 @@ export class SlackServer {
           : undefined;
         logger.info(`Prev session: ${prevSession?.id}`);
 
+        if (prevSession && ['started', 'running'].includes(prevSession.state)) {
+          await this.app.client.chat.postMessage({
+            channel: event.channel,
+            ...(event.thread_ts ? { thread_ts: event.thread_ts } : {}),
+            text: `:information_source: Session is running. If you want to interrupt it, type "<@${context.botUserId}> STOP"`,
+          });
+          return;
+        }
+
         if (prevSession && prevSession.slack.userId !== event.user) {
           await this.app.client.chat.postEphemeral({
             channel: event.channel,
