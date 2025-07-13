@@ -88,6 +88,8 @@ spec:
         env:
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /secret/google-cred.json
+        - name: LOG_LEVEL
+          value: debug
         volumeMounts:
         - name: secret
           mountPath: /secret

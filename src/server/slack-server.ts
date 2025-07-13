@@ -45,20 +45,34 @@ export class SlackServer {
   }
 
   private setupEventHandlers(): void {
-    // Handle app mentions only
-    this.app.event('app_mention', async ({ event, payload, context }) => {
-      const cleanText = event.text.replace(`<@${context.botUserId}>`, '').trim();
+    this.app.message(async ({ event, payload, context, message }) => {
+      logger.debug({ message }, 'Message received');
+
+      if (message.subtype !== undefined) {
+        logger.info({ message }, 'Ignoring message with subtype');
+        return;
+      }
+
+      if (!message.text) {
+        return;
+      }
+
+      if (!message.text.includes(`<@${context.botUserId}>`)) {
+        return;
+      }
+
+      const cleanText = message.text.replace(`<@${context.botUserId}>`, '').trim();
       logger.info({ cleanText, payload }, 'App mentioned');
 
-      if (cleanText.trim() === 'STOP' && event.thread_ts) {
+      if (cleanText.trim() === 'STOP' && message.thread_ts) {
         const session = await this.database.findSessionBySlackThread({
           channelId: event.channel,
-          threadTs: event.thread_ts,
+          threadTs: message.thread_ts,
         });
         if (!session) {
           await this.app.client.chat.postMessage({
             channel: event.channel,
-            thread_ts: event.thread_ts,
+            thread_ts: message.thread_ts,
             text: `:information_source: Session not found`,
           });
           return;
@@ -66,15 +80,15 @@ export class SlackServer {
         if (!['started', 'running'].includes(session.state)) {
           await this.app.client.chat.postMessage({
             channel: event.channel,
-            thread_ts: event.thread_ts,
+            thread_ts: message.thread_ts,
             text: `:information_source: Session is not running`,
           });
           return;
         }
-        if (session.slack.userId !== event.user) {
+        if (session.slack.userId !== message.user) {
           await this.app.client.chat.postMessage({
             channel: event.channel,
-            thread_ts: event.thread_ts,
+            thread_ts: message.thread_ts,
             text: `:information_source: You are not authorized to stop this session`,
           });
           return;
@@ -88,17 +102,17 @@ export class SlackServer {
 
       try {
         logger.info(
-          `App mentioned: ${event.text} from user ${event.user} in channel ${event.channel} (event_ts: ${event.event_ts}, thread_ts: ${event.thread_ts})`
+          `App mentioned: ${message.text} from user ${message.user} in channel ${event.channel} (event_ts: ${event.event_ts}, thread_ts: ${message.thread_ts})`
         );
 
-        if (!event.user) {
+        if (!message.user) {
           throw new Error('User ID is required');
         }
 
-        const prevSession = event.thread_ts
+        const prevSession = message.thread_ts
           ? await this.database.findSessionBySlackThread({
               channelId: event.channel,
-              threadTs: event.thread_ts,
+              threadTs: message.thread_ts,
             })
           : undefined;
         logger.info(`Prev session: ${prevSession?.id}`);
@@ -106,26 +120,26 @@ export class SlackServer {
         if (prevSession && ['started', 'running'].includes(prevSession.state)) {
           await this.app.client.chat.postMessage({
             channel: event.channel,
-            ...(event.thread_ts ? { thread_ts: event.thread_ts } : {}),
+            ...(message.thread_ts ? { thread_ts: message.thread_ts } : {}),
             text: `:information_source: Session is running. If you want to interrupt it, type "<@${context.botUserId}> STOP"`,
           });
           return;
         }
 
-        if (prevSession && prevSession.slack.userId !== event.user) {
+        if (prevSession && prevSession.slack.userId !== message.user) {
           await this.app.client.chat.postEphemeral({
             channel: event.channel,
-            user: event.user,
-            ...(event.thread_ts ? { thread_ts: event.thread_ts } : {}),
+            user: message.user,
+            ...(message.thread_ts ? { thread_ts: message.thread_ts } : {}),
             text: 'You are not authorized to start a new session from this thread',
           });
           return;
         }
 
-        if (event.thread_ts) {
+        if (message.thread_ts) {
           const originalMessagePermalink = await this.app.client.chat.getPermalink({
             channel: event.channel,
-            message_ts: event.ts,
+            message_ts: message.ts,
           });
 
           if (!originalMessagePermalink.ok || !originalMessagePermalink.permalink) {
@@ -135,7 +149,7 @@ export class SlackServer {
           // send a new message to the channel to start a thread
           const newMessage = await this.app.client.chat.postMessage({
             channel: event.channel,
-            text: `<@${event.user}> Session started from <${originalMessagePermalink.permalink}|this message>`,
+            text: `<@${message.user}> Session started from <${originalMessagePermalink.permalink}|this message>`,
           });
 
           if (!newMessage.ok || !newMessage.ts) {
@@ -154,7 +168,7 @@ export class SlackServer {
 
           await this.app.client.chat.postMessage({
             channel: event.channel,
-            thread_ts: event.thread_ts,
+            thread_ts: message.thread_ts,
             text: `<${newMessagePermalink.permalink}|Session started>`,
           });
 
@@ -166,13 +180,13 @@ export class SlackServer {
         const session = await this.database.createSessionFromSlackThread({
           channelId: event.channel,
           threadTs: targetThreadTs,
-          userId: event.user,
+          userId: message.user,
         });
 
-        const threadHistory = event.thread_ts
+        const threadHistory = message.thread_ts
           ? await this.app.client.conversations.replies({
               channel: event.channel,
-              ts: event.thread_ts,
+              ts: message.thread_ts,
             })
           : undefined;
 
@@ -182,7 +196,7 @@ export class SlackServer {
 
         let githubToken: string | undefined;
         if (this.github) {
-          githubToken = await this.github.getTokenForUser(event.user);
+          githubToken = await this.github.getTokenForUser(message.user);
         }
 
         await this.infra.start({
@@ -194,18 +208,17 @@ export class SlackServer {
           githubToken,
         });
 
-        const message = `Session starting...`;
         await this.app.client.chat.postMessage({
           channel: event.channel,
           thread_ts: targetThreadTs,
-          text: message,
+          text: message.text,
           blocks: [
             {
               type: 'context',
               elements: [
                 {
                   type: 'mrkdwn',
-                  text: `:information_source: ${message}`,
+                  text: `:information_source: Session starting...`,
                 },
               ],
             },
@@ -214,18 +227,17 @@ export class SlackServer {
       } catch (error) {
         logger.error(`Error handling app mention: ${error}`);
 
-        const message = `Error starting session: ${error instanceof Error ? error.message : 'Unknown error'}`;
         await this.app.client.chat.postMessage({
           channel: event.channel,
-          thread_ts: targetThreadTs ?? event.thread_ts ?? event.ts,
-          text: message,
+          thread_ts: targetThreadTs ?? message.thread_ts ?? message.ts,
+          text: message.text,
           blocks: [
             {
               type: 'context',
               elements: [
                 {
                   type: 'mrkdwn',
-                  text: `:information_source: ${message}`,
+                  text: `:information_source: Error starting session: ${error instanceof Error ? error.message : 'Unknown error'}`,
                 },
               ],
             },
