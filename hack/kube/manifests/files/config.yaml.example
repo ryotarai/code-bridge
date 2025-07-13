@@ -9,18 +9,20 @@ slack:
 logging:
   level: info
 
-kubernetes:
-  namespace: code-bridge-runner
-  runner:
-    apiServerURL: http://code-bridge-server.code-bridge-system.svc.cluster.local:8080
-    image: code-bridge-runner
-    podSpec:
+runner:
+  infra:
+    type: kubernetes
+    kubernetes:
+      namespace: code-bridge-runner
+      image: code-bridge-runner
+      podSpec:
       containers:
       - name: main
         imagePullPolicy: IfNotPresent
         envFrom:
         - secretRef:
             name: code-bridge-runner-env
+  apiServerURL: http://code-bridge-server.code-bridge-system.svc.cluster.local:8080
 
 database:
   type: firestore
