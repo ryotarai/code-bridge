@@ -56,8 +56,30 @@ export class SlackServer {
           threadTs: event.thread_ts,
         });
         if (!session) {
+          await this.app.client.chat.postMessage({
+            channel: event.channel,
+            thread_ts: event.thread_ts,
+            text: `:information_source: Session not found`,
+          });
           return;
         }
+        if (!['started', 'running'].includes(session.state)) {
+          await this.app.client.chat.postMessage({
+            channel: event.channel,
+            thread_ts: event.thread_ts,
+            text: `:information_source: Session is not running`,
+          });
+          return;
+        }
+        if (session.slack.userId !== event.user) {
+          await this.app.client.chat.postMessage({
+            channel: event.channel,
+            thread_ts: event.thread_ts,
+            text: `:information_source: You are not authorized to stop this session`,
+          });
+          return;
+        }
+
         await this.infra.stop(session);
         return;
       }
