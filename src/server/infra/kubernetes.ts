@@ -8,13 +8,13 @@ import { Infra, StartOptions } from './infra.js';
 
 export class KubernetesInfra implements Infra {
   private k8sApi: k8s.CoreV1Api;
-  private config: Config['kubernetes'];
+  private config: Config['runner'];
   private database: Database;
   private k8sExec: k8s.Exec;
   private storage: Storage;
   private k8sWatch: k8s.Watch;
 
-  constructor(config: Config['kubernetes'], database: Database, storage: Storage) {
+  constructor(config: Config['runner'], database: Database, storage: Storage) {
     const kc = new k8s.KubeConfig();
     kc.loadFromDefault();
 
@@ -37,8 +37,8 @@ export class KubernetesInfra implements Infra {
     logger.info({ sessionId }, 'Starting Kubernetes pod for session');
 
     const fullSystemPrompt = [
-      this.config.runner.defaultSystemPrompt,
-      this.config.runner.systemPrompt,
+      this.config.defaultSystemPrompt,
+      this.config.systemPrompt,
       systemPrompt,
     ]
       .filter((v) => !!v)
@@ -46,7 +46,7 @@ export class KubernetesInfra implements Infra {
 
     // Create a secret
     const secret = await this.k8sApi.createNamespacedSecret({
-      namespace: this.config.namespace,
+      namespace: this.config.infra.kubernetes.namespace,
       body: {
         metadata: {
           generateName: `code-bridge-runner-${sessionId.toLowerCase()}-`,
@@ -68,7 +68,9 @@ export class KubernetesInfra implements Infra {
     });
 
     // Create a pod (deep copy)
-    const podSpec = JSON.parse(JSON.stringify(this.config.runner.podSpec)) as k8s.V1PodSpec;
+    const podSpec = JSON.parse(
+      JSON.stringify(this.config.infra.kubernetes.podSpec)
+    ) as k8s.V1PodSpec;
 
     if (!podSpec.volumes) {
       podSpec.volumes = [];
@@ -108,14 +110,14 @@ export class KubernetesInfra implements Infra {
     });
     mainContainer.env.push({
       name: 'API_SERVER_URL',
-      value: this.config.runner.apiServerURL,
+      value: this.config.apiServerURL,
     });
     mainContainer.env.push({
       name: 'SESSION_ID',
       value: sessionId,
     });
 
-    mainContainer.image = this.config.runner.image;
+    mainContainer.image = this.config.infra.kubernetes.image;
 
     if (!mainContainer.envFrom) {
       mainContainer.envFrom = [];
@@ -157,7 +159,7 @@ export class KubernetesInfra implements Infra {
     };
 
     const pods = await this.k8sApi.createNamespacedPod({
-      namespace: this.config.namespace,
+      namespace: this.config.infra.kubernetes.namespace,
       body: {
         metadata: {
           generateName: `code-bridge-runner-${sessionId.toLowerCase()}-`,
@@ -177,12 +179,12 @@ export class KubernetesInfra implements Infra {
     // Update the owner reference of the secret to the pod
     await this.k8sApi.replaceNamespacedSecret({
       name: secret.metadata!.name!,
-      namespace: this.config.namespace,
+      namespace: this.config.infra.kubernetes.namespace,
       body: secret,
     });
 
     await this.database.updatePod(sessionId, {
-      namespace: this.config.namespace,
+      namespace: this.config.infra.kubernetes.namespace,
       name: pods.metadata!.name!,
     });
   }
@@ -284,14 +286,14 @@ export class KubernetesInfra implements Infra {
 
     await this.k8sApi.deleteNamespacedPod({
       name: session.pod.name,
-      namespace: this.config.namespace,
+      namespace: this.config.infra.kubernetes.namespace,
     });
 
     // watch the pod until it is deleted
     await new Promise<void>((resolve, reject) => {
       this.k8sWatch
         .watch(
-          `/api/v1/namespaces/${this.config.namespace}/pods`,
+          `/api/v1/namespaces/${this.config.infra.kubernetes.namespace}/pods`,
           { fieldSelector: `metadata.name=${session.pod!.name}` },
           (phase) => {
             if (phase === 'DELETED') {

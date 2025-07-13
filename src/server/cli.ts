@@ -48,7 +48,7 @@ program
       const storage = createStorage(config.storage);
       const database = new FirestoreDatabase(firestore);
 
-      const infra = new KubernetesInfra(config.kubernetes, database, storage);
+      const infra = new KubernetesInfra(config.runner, database, storage);
       const slackServer = new SlackServer({
         infra,
         socketToken: config.slack.appToken,

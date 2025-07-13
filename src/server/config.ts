@@ -40,16 +40,21 @@ export const ConfigSchema = z.object({
       level: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
     })
     .optional(),
-  kubernetes: z.object({
-    namespace: z.string().default('default'),
-    configPath: z.string().optional(),
-    runner: z.object({
-      apiServerURL: z.string().min(1),
-      image: z.string().min(1),
-      podSpec: z.object({}).passthrough(),
-      systemPrompt: z.string().optional(),
-      defaultSystemPrompt: z.string().optional().default(defaultSystemPrompt),
-    }),
+  runner: z.object({
+    systemPrompt: z.string().optional(),
+    defaultSystemPrompt: z.string().optional().default(defaultSystemPrompt),
+    apiServerURL: z.string().min(1),
+    infra: z.discriminatedUnion('type', [
+      z.object({
+        type: z.literal('kubernetes'),
+        kubernetes: z.object({
+          namespace: z.string().default('default'),
+          configPath: z.string().optional(),
+          image: z.string().min(1),
+          podSpec: z.object({}).passthrough(),
+        }),
+      }),
+    ]),
   }),
   storage: z.discriminatedUnion('type', [
     z.object({
