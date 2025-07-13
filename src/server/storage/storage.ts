@@ -1,5 +1,4 @@
 import { Storage as GcsClient } from '@google-cloud/storage';
-import { createHash } from 'node:crypto';
 import { Config } from '../config';
 
 export interface Storage {
@@ -19,19 +18,19 @@ export class GcsStorage implements Storage {
   ) {}
 
   async getSessionUploadUrl(sessionId: string): Promise<string> {
-    return this.getUploadUrl(`${sessionId}-claude-session.jsonl`, 'application/jsonl');
+    return this.getUploadUrl(`sessions/${sessionId}.jsonl`, 'application/jsonl');
   }
 
   async getSessionDownloadUrl(sessionId: string): Promise<string> {
-    return this.getDownloadUrl(`${sessionId}-claude-session.jsonl`);
+    return this.getDownloadUrl(`sessions/${sessionId}.jsonl`);
   }
 
   async getWorkspaceUploadUrl(sessionId: string): Promise<string> {
-    return this.getUploadUrl(`${sessionId}-workspace.tar.gz`, 'application/tar+gzip');
+    return this.getUploadUrl(`workspaces/${sessionId}.tar.gz`, 'application/tar+gzip');
   }
 
   async getWorkspaceDownloadUrl(sessionId: string): Promise<string> {
-    return this.getDownloadUrl(`${sessionId}-workspace.tar.gz`);
+    return this.getDownloadUrl(`workspaces/${sessionId}.tar.gz`);
   }
 
   async getUploadUrl(key: string, contentType: string): Promise<string> {
@@ -58,8 +57,7 @@ export class GcsStorage implements Storage {
   }
 
   private objectName(key: string): string {
-    const hash = createHash('md5').update(key).digest('hex');
-    return `${this.prefix}${hash}-${key}`;
+    return `${this.prefix}${key}`;
   }
 }
 
