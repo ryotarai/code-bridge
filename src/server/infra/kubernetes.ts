@@ -1,7 +1,7 @@
 import * as k8s from '@kubernetes/client-node';
 import { PassThrough } from 'stream';
 import { Config } from '../config.js';
-import { Database } from '../database/database.js';
+import { Database, Session } from '../database/database.js';
 import { logger } from '../logger.js';
 import { Storage } from '../storage/storage.js';
 import { Infra, StartOptions } from './infra.js';
@@ -12,6 +12,7 @@ export class KubernetesInfra implements Infra {
   private database: Database;
   private k8sExec: k8s.Exec;
   private storage: Storage;
+  private k8sWatch: k8s.Watch;
 
   constructor(config: Config['kubernetes'], database: Database, storage: Storage) {
     const kc = new k8s.KubeConfig();
@@ -19,6 +20,7 @@ export class KubernetesInfra implements Infra {
 
     this.k8sApi = kc.makeApiClient(k8s.CoreV1Api);
     this.k8sExec = new k8s.Exec(kc);
+    this.k8sWatch = new k8s.Watch(kc);
     this.config = config;
     this.database = database;
     this.storage = storage;
@@ -265,5 +267,38 @@ export class KubernetesInfra implements Infra {
     } catch (err) {
       logger.error({ error: err }, 'Error approving or denying tool');
     }
+  }
+
+  async stop(session: Session): Promise<void> {
+    if (!session.pod) {
+      throw new Error('Pod not found');
+    }
+
+    logger.info({ sessionId: session.id }, 'Stopping Kubernetes pod for session');
+
+    await this.k8sApi.deleteNamespacedPod({
+      name: session.pod.name,
+      namespace: this.config.namespace,
+    });
+
+    // watch the pod until it is deleted
+    await new Promise<void>((resolve, reject) => {
+      this.k8sWatch
+        .watch(
+          `/api/v1/namespaces/${this.config.namespace}/pods`,
+          { fieldSelector: `metadata.name=${session.pod!.name}` },
+          (phase) => {
+            if (phase === 'DELETED') {
+              resolve();
+            }
+          },
+          (err: any) => {
+            reject(err);
+          }
+        )
+        .catch(reject);
+    });
+
+    await this.database.updateSessionState(session.id, 'finished');
   }
 }

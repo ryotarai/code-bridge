@@ -1,3 +1,5 @@
+import { Session } from '../database/database';
+
 export type StartOptions = {
   initialInput: string;
   sessionId: string;
@@ -20,4 +22,5 @@ export interface Infra {
     requestId: string;
     approve: boolean;
   }): Promise<void>;
+  stop(session: Session): Promise<void>;
 }

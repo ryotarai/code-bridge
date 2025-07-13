@@ -12,7 +12,9 @@ load/runner: build
 	kind load docker-image code-bridge-runner --name code-bridge
 
 .PHONY: load
-load: load/server load/runner
+load:
+	make load/server
+	make load/runner
 
 .PHONY: dev/deploy
 dev/deploy: load

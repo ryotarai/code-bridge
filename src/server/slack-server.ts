@@ -3,7 +3,6 @@ import type {
   BlockAction,
   ButtonAction,
   SlackActionMiddlewareArgs,
-  SlackEventMiddlewareArgs,
 } from '@slack/bolt';
 import bolt from '@slack/bolt';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsRepliesResponse.js';
@@ -47,7 +46,22 @@ export class SlackServer {
 
   private setupEventHandlers(): void {
     // Handle app mentions only
-    this.app.event('app_mention', async ({ event }: SlackEventMiddlewareArgs<'app_mention'>) => {
+    this.app.event('app_mention', async ({ event, payload, context }) => {
+      const cleanText = event.text.replace(`<@${context.botUserId}>`, '').trim();
+      logger.info({ cleanText, payload }, 'App mentioned');
+
+      if (cleanText.trim() === 'STOP' && event.thread_ts) {
+        const session = await this.database.findSessionBySlackThread({
+          channelId: event.channel,
+          threadTs: event.thread_ts,
+        });
+        if (!session) {
+          return;
+        }
+        await this.infra.stop(session);
+        return;
+      }
+
       let targetThreadTs: string | undefined;
 
       try {
@@ -141,7 +155,7 @@ export class SlackServer {
         }
 
         await this.infra.start({
-          initialInput: event.text,
+          initialInput: cleanText,
           sessionId: session.id,
           sessionKey: session.key,
           resumeSessionId: prevSession?.id,

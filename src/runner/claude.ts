@@ -69,6 +69,21 @@ export async function runClaude({
     stdio: ['pipe', 'pipe', 'pipe'],
   });
 
+  // Setup SIGTERM handler to forward signal to claude process
+  const handleSigterm = () => {
+    logger.info('Received SIGTERM, forwarding to claude process');
+    if (claude.pid && !claude.killed) {
+      claude.kill('SIGTERM');
+    }
+  };
+
+  process.on('SIGTERM', handleSigterm);
+
+  // Cleanup function to remove signal handler
+  const cleanup = () => {
+    process.removeListener('SIGTERM', handleSigterm);
+  };
+
   let stderrBuf = '';
   claude.stderr.on('data', (data) => {
     stderrBuf += data.toString();
@@ -146,9 +161,13 @@ export async function runClaude({
   const exitCode = await new Promise<number | null>((resolve) => {
     claude.on('error', (error) => {
       logger.error({ error }, 'Claude process error');
+      cleanup();
       resolve(null);
     });
-    claude.on('exit', resolve);
+    claude.on('exit', (code) => {
+      cleanup();
+      resolve(code);
+    });
   });
 
   if (exitCode !== 0) {
