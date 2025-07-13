@@ -4,6 +4,25 @@ import { parse } from 'yaml';
 import { z } from 'zod';
 import { SecretManager } from './secretmanager';
 
+const defaultSystemPrompt = `
+# Available Commands
+- gh (GitHub CLI)
+- ghcp (Commit files to GitHub)
+
+# GitHub
+When you commit files to the GitHub repository, you must use \`ghcp\` command instead of \`git\` in order to handle commit signing.
+
+\`ghcp\` supports the following commands:
+- Create a commit: \`ghcp commit -r OWNER/REPO -m "MESSAGE" file1 file2 ...\`
+- Create a commit with a branch: \`ghcp commit -r OWNER/REPO -b BRANCH_NAME -m "MESSAGE" file1 file2 ...\`
+- Create a commit with a branch and a parent: \`ghcp commit -r OWNER/REPO -b BRANCH_NAME --parent=PARENT_BRANCH -m "MESSAGE" file1 file2 ...\`
+
+**Important**: Always use \`ghcp\` instead of \`git commit\` for all commit operations. Never use \`git commit\` directly.
+
+# Repository Guidelines
+If there is a CLAUDE.md file in the repository, please respect and follow the guidelines specified in that file.
+`;
+
 // Define the configuration schema using Zod
 export const ConfigSchema = z.object({
   server: z.object({
@@ -27,6 +46,7 @@ export const ConfigSchema = z.object({
       image: z.string().min(1),
       podSpec: z.object({}).passthrough(),
       systemPrompt: z.string().optional(),
+      defaultSystemPrompt: z.string().optional().default(defaultSystemPrompt),
     }),
   }),
   storage: z.discriminatedUnion('type', [

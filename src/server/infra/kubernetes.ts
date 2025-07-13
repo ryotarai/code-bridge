@@ -36,7 +36,13 @@ export class KubernetesInfra implements Infra {
   }: StartOptions): Promise<void> {
     logger.info({ sessionId }, 'Starting Kubernetes pod for session');
 
-    const fullSystemPrompt = (this.config.runner.systemPrompt ?? '') + '\n===\n' + systemPrompt;
+    const fullSystemPrompt = [
+      this.config.runner.defaultSystemPrompt,
+      this.config.runner.systemPrompt,
+      systemPrompt,
+    ]
+      .filter((v) => !!v)
+      .join('\n---\n');
 
     // Create a secret
     const secret = await this.k8sApi.createNamespacedSecret({

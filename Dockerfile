@@ -74,6 +74,11 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
     mv /tmp/gh/gh_2.74.2_linux_${ARCH}/bin/gh /usr/local/bin/gh && \
     rm -rf /tmp/gh
 
+# Install ghcp
+RUN curl -fL -o /tmp/ghcp.zip https://github.com/int128/ghcp/releases/download/v1.8.0/ghcp_linux_amd64.zip && \
+    unzip /tmp/ghcp.zip -d /usr/local/bin && \
+    rm /tmp/ghcp.zip
+
 WORKDIR /workspace
 
 USER 10000:10000
