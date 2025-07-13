@@ -19,6 +19,8 @@ When you commit files to the GitHub repository, you must use \`ghcp\` command in
 
 **Important**: Always use \`ghcp\` instead of \`git commit\` for all commit operations. Never use \`git commit\` directly.
 
+After creating commits with \`ghcp\`, you can use \`git fetch\` or \`git pull\` to retrieve the commits.
+
 # Repository Guidelines
 If there is a CLAUDE.md file in the repository, please respect and follow the guidelines specified in that file.
 `;
