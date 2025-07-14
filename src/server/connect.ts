@@ -113,16 +113,7 @@ export const buildRoutes = ({
             await slackClient.chat.postMessage({
               channel: session.slack.channelId,
               thread_ts: session.slack.threadTs,
-              text: messageText, // fallback text
-              blocks: [
-                {
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: messageText,
-                  },
-                },
-              ],
+              text: messageText,
             });
           }
         }
